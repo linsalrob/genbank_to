@@ -1,0 +1,297 @@
+LOCUS       NC_001417               3569 bp    RNA     linear   PHG 11-OCT-2021
+DEFINITION  phage MS2 genome.
+ACCESSION   NC_001417
+VERSION     NC_001417.2
+DBLINK      BioProject: PRJNA485481
+KEYWORDS    RefSeq; coat protein; genome.
+SOURCE      Escherichia phage MS2
+  ORGANISM  Escherichia phage MS2
+            Viruses; Riboviria; Orthornavirae; Lenarviricota; Leviviricetes;
+            Levivirales; Leviviridae; Levivirus.
+REFERENCE   1  (bases 1 to 3569)
+  AUTHORS   de Smit,M.H. and van Duin,J.
+  TITLE     Translational initiation at the coat-protein gene of phage MS2:
+            native upstream RNA relieves inhibition by local secondary
+            structure
+  JOURNAL   Mol. Microbiol. 9 (5), 1079-1088 (1993)
+   PUBMED   7934914
+REFERENCE   2
+  AUTHORS   Auerswald,E.A., Horlein,D., Reinhardt,G., Schroder,W. and
+            Schnabel,E.
+  TITLE     Expression, isolation and characterization of recombinant
+            [Arg15,Glu52]aprotinin
+  JOURNAL   Biol. Chem. Hoppe-Seyler 369 (SUPPL), 27-35 (1988)
+   PUBMED   2462433
+REFERENCE   3
+  AUTHORS   Beremand,M.N. and Blumenthal,T.
+  TITLE     Overlapping genes in RNA phage: a new protein implicated in lysis
+  JOURNAL   Cell 18 (2), 257-266 (1979)
+   PUBMED   387256
+  REMARK    identification of l-protein
+REFERENCE   4  (bases 1 to 3569)
+  AUTHORS   Schwartz,R.M. and Dayhoff,M.O.
+  TITLE     Genome Nucleic Acids
+  JOURNAL   (in) Dayhoff,M.O. (Ed.);
+            ATLAS OF PROTEIN SEQUENCE AND STRUCTURE, VOUME 5, SUPPLEMENT 3:
+            338-344;
+            National Biomedical Research Foundation, Silver Spring (1978)
+REFERENCE   5  (bases 1761 to 3398)
+  AUTHORS   Fiers,W., Contreras,R., Duerinck,F., Haegeman,G., Iserentant,D.,
+            Merregaert,J., Min Jou,W., Molemans,F., Raeymaekers,A., Van den
+            Berghe,A., Volckaert,G. and Ysebaert,M.
+  TITLE     Complete nucleotide sequence of bacteriophage MS2 RNA: primary and
+            secondary structure of the replicase gene
+  JOURNAL   Nature 260 (5551), 500-507 (1976)
+   PUBMED   1264203
+REFERENCE   6  (bases 130 to 1355)
+  AUTHORS   Fiers,W., Contreras,R., Duerinck,F., Haegmean,G., Merregaert,J.,
+            Jou,W.M., Raeymakers,A., Volckaert,G., Ysebaert,M., Van de
+            Kerckhove,J., Nolf,F. and Van Montagu,M.
+  TITLE     A-protein gene of bacteriophage MS2
+  JOURNAL   Nature 256 (5515), 273-278 (1975)
+   PUBMED   806810
+REFERENCE   7  (bases 3209 to 3569)
+  AUTHORS   Vandenberghe,A., Min Jou,W. and Fiers,W.
+  TITLE     3'-Terminal nucletide sequence (n equals 361) of bacteriophage MS2
+            RNA
+  JOURNAL   Proc. Natl. Acad. Sci. U.S.A. 72 (7), 2559-2562 (1975)
+   PUBMED   809766
+REFERENCE   8
+  AUTHORS   Contreras,R., Vandenberghe,A., Volckaert,G., Min Jou,W. and
+            Fiers,W.
+  TITLE     Studies on the bacteriophage MS2. Some nucleotide sequences from
+            the RNA-polymerase gene
+  JOURNAL   FEBS Lett. 24 (3), 339-342 (1972)
+   PUBMED   11946702
+REFERENCE   9  (bases 1308 to 1781)
+  AUTHORS   Min Jou,W., Haegeman,G., Ysebaert,M. and Fiers,W.
+  TITLE     Nucleotide sequence of the gene coding for the bacteriophage MS2
+            coat protein
+  JOURNAL   Nature 237 (5350), 82-88 (1972)
+   PUBMED   4555447
+REFERENCE   10 (bases 1 to 125)
+  AUTHORS   de Wachter,R., Merregaert,J., Vandenberghe,A., Contreras,R. and
+            Fiers,W.
+  TITLE     Studies on the bacteriophage MS2. The untranslated 5'-terminal
+            nucleotide sequence preceding the first cistron
+  JOURNAL   Eur. J. Biochem. 22 (3), 400-414 (1971)
+   PUBMED   5125360
+REFERENCE   11 (bases 1 to 3569)
+  CONSRTM   NCBI Genome Project
+  TITLE     Direct Submission
+  JOURNAL   Submitted (04-JUN-2019) National Center for Biotechnology
+            Information, NIH, Bethesda, MD 20894, USA
+REFERENCE   12 (bases 2270 to 2271)
+  AUTHORS   Min Jou,W.
+  TITLE     Direct Submission
+  JOURNAL   Submitted (13-JAN-1983)
+COMMENT     PROVISIONAL REFSEQ: This record has not yet been subject to final
+            NCBI review. The reference sequence is identical to V00642.
+            On Apr 7, 2008 this sequence version replaced NC_001417.1.
+            The sequence was taken from reference [8].
+            KST MS2.
+            COMPLETENESS: full length.
+FEATURES             Location/Qualifiers
+     source          1..3569
+                     /organism="Escherichia phage MS2"
+                     /mol_type="genomic RNA"
+                     /db_xref="taxon:12022"
+     gene            130..1311
+                     /gene="mat"
+                     /locus_tag="MS2g1"
+                     /db_xref="GeneID:1260898"
+     CDS             130..1311
+                     /gene="mat"
+                     /locus_tag="MS2g1"
+                     /note="A-protein"
+                     /codon_start=1
+                     /transl_table=11
+                     /product="hypothetical protein"
+                     /protein_id="YP_009640124.1"
+                     /db_xref="GOA:P03610"
+                     /db_xref="InterPro:IPR005563"
+                     /db_xref="UniProtKB/Swiss-Prot:P03610"
+                     /db_xref="GeneID:1260898"
+                     /translation="MRAFSTLDRENETFVPSVRVYADGETEDNSFSLKYRSNWTPGRF
+                     NSTGAKTKQWHYPSPYSRGALSVTSIDQGAYKRSGSSWGRPYEEKAGFGFSLDARSCY
+                     SLFPVSQNLTYIEVPQNVANRASTEVLQKVTQGNFNLGVALAEARSTASQLATQTIAL
+                     VKAYTAARRGNWRQALRYLALNEDRKFRSKHVAGRWLELQFGWLPLMSDIQGAYEMLT
+                     KVHLQEFLPMRAVRQVGTNIKLDGRLSYPAANFQTTCNISRRIVIWFYINDARLAWLS
+                     SLGILNPLGIVWEKVPFSFVVDWLLPVGNMLEGLTAPVGCSYMSGTVTDVITGESIIS
+                     VDAPYGWTVERQGTAKAQISAMHRGVQSVWPTTGAYVKSPFSMVHTLDALALIRQRLS
+                     R"
+     gene            1335..1727
+                     /gene="cp"
+                     /locus_tag="MS2g2"
+                     /db_xref="GeneID:1260899"
+     CDS             1335..1727
+                     /gene="cp"
+                     /locus_tag="MS2g2"
+                     /codon_start=1
+                     /transl_table=11
+                     /product="coat protein"
+                     /protein_id="YP_009640125.1"
+                     /db_xref="GOA:P03612"
+                     /db_xref="InterPro:IPR002703"
+                     /db_xref="InterPro:IPR015954"
+                     /db_xref="PDB:1AQ3"
+                     /db_xref="PDB:1AQ4"
+                     /db_xref="PDB:1BMS"
+                     /db_xref="PDB:1MSC"
+                     /db_xref="PDB:1MST"
+                     /db_xref="PDB:1MVA"
+                     /db_xref="PDB:1MVB"
+                     /db_xref="PDB:1U1Y"
+                     /db_xref="PDB:1ZDH"
+                     /db_xref="PDB:1ZDI"
+                     /db_xref="PDB:1ZDJ"
+                     /db_xref="PDB:1ZDK"
+                     /db_xref="PDB:1ZSE"
+                     /db_xref="PDB:2B2D"
+                     /db_xref="PDB:2B2E"
+                     /db_xref="PDB:2B2G"
+                     /db_xref="PDB:2BNY"
+                     /db_xref="PDB:2BQ5"
+                     /db_xref="PDB:2BS0"
+                     /db_xref="PDB:2BS1"
+                     /db_xref="PDB:2BU1"
+                     /db_xref="PDB:2C4Q"
+                     /db_xref="PDB:2C4Y"
+                     /db_xref="PDB:2C4Z"
+                     /db_xref="PDB:2C50"
+                     /db_xref="PDB:2C51"
+                     /db_xref="PDB:2IZ8"
+                     /db_xref="PDB:2IZ9"
+                     /db_xref="PDB:2IZM"
+                     /db_xref="PDB:2IZN"
+                     /db_xref="PDB:2MS2"
+                     /db_xref="PDB:2VTU"
+                     /db_xref="PDB:2WBH"
+                     /db_xref="PDB:5MSF"
+                     /db_xref="PDB:6MSF"
+                     /db_xref="PDB:7MSF"
+                     /db_xref="UniProtKB/Swiss-Prot:P03612"
+                     /db_xref="GeneID:1260899"
+                     /translation="MASNFTQFVLVDNGGTGDVTVAPSNFANGVAEWISSNSRSQAYK
+                     VTCSVRQSSAQNRKYTIKVEVPKVATQTVGGVELPVAAWRSYLNMELTIPIFATNSDC
+                     ELIVKAMQGLLKDGNPIPSAIAANSGIY"
+     gene            1678..1905
+                     /gene="lys"
+                     /locus_tag="MS2g3"
+                     /db_xref="GeneID:1260897"
+     CDS             1678..1905
+                     /gene="lys"
+                     /locus_tag="MS2g3"
+                     /note="L-protein"
+                     /codon_start=1
+                     /transl_table=11
+                     /product="hypothetical protein"
+                     /protein_id="YP_009640126.1"
+                     /db_xref="GOA:P03609"
+                     /db_xref="InterPro:IPR022599"
+                     /db_xref="UniProtKB/Swiss-Prot:P03609"
+                     /db_xref="GeneID:1260897"
+                     /translation="METRFPQQSQQTPASTNRRRPFKHEDYPCRRQQRSSTLYVLIFL
+                     AIFLSKFTNQLLLSLLEAVIRTVTTLQQLLT"
+     gene            1761..3398
+                     /gene="rep"
+                     /locus_tag="MS2g4"
+                     /db_xref="GeneID:1260900"
+     CDS             1761..3398
+                     /gene="rep"
+                     /locus_tag="MS2g4"
+                     /note="replicase, beta subunit"
+                     /codon_start=1
+                     /transl_table=11
+                     /product="hypothetical protein"
+                     /protein_id="YP_009640127.1"
+                     /db_xref="GOA:P00585"
+                     /db_xref="InterPro:IPR005093"
+                     /db_xref="InterPro:IPR007096"
+                     /db_xref="UniProtKB/Swiss-Prot:P00585"
+                     /db_xref="GeneID:1260900"
+                     /translation="MSKTTKKFNSLCIDLPRDLSLEIYQSIASVATGSGDPHSDDFTA
+                     IAYLRDELLTKHPTLGSGNDEATRRTLAIAKLREANGDRGQINREGFLHDKSLSWDPD
+                     VLQTSIRSLIGNLLSGYRSSLFGQCTFSNGAPMGHKLQDAAPYKKFAEQATVTPRALR
+                     AALLVRDQCAPWIRHAVRYNESYEFRLVVGNGVFTVPKNNKIDRAACKEPDMNMYLQK
+                     GVGAFIRRRLKSVGIDLNDQSINQRLAQQGSVDGSLATIDLSSASDSISDRLVWSFLP
+                     PELYSYLDRIRSHYGIVDGETIRWELFSTMGNGFTFELESMIFWAIVKATQIHFGNAG
+                     TIGIYGDDIICPSEIAPRVLEALAYYGFKPNLRKTFVSGLFRESCGAHFYRGVDVKPF
+                     YIKKPVDNLFALMLILNRLRGWGVVGGMSDPRLYKVWVRLSSQVPSMFFGGTDLAADY
+                     YVVSPPTAVSVYTKTPYGRLLADTRTSGFRLARIARERKFFSEKHDSGRYIAWFHTGG
+                     EITDSMKSAGVRVIRTSEWLTPVPTFPQECGPASSPR"
+     misc_difference 2001..2008
+                     /gene="rep"
+                     /locus_tag="MS2g4"
+                     /note="ggugauc is gaucggu in [10];
+                     conflict"
+                     /citation=[2]
+     misc_difference 2270..2271
+                     /gene="rep"
+                     /locus_tag="MS2g4"
+                     /note="cg is gc in [9];
+                     conflict"
+                     /citation=[12]
+ORIGIN      
+        1 gggtgggacc cctttcgggg tcctgctcaa cttcctgtcg agctaatgcc atttttaatg
+       61 tctttagcga gacgctacca tggctatcgc tgtaggtagc cggaattcca ttcctaggag
+      121 gtttgacctg tgcgagcttt tagtaccctt gatagggaga acgagacctt cgtcccctcc
+      181 gttcgcgttt acgcggacgg tgagactgaa gataactcat tctctttaaa atatcgttcg
+      241 aactggactc ccggtcgttt taactcgact ggggccaaaa cgaaacagtg gcactacccc
+      301 tctccgtatt cacggggggc gttaagtgtc acatcgatag atcaaggtgc ctacaagcga
+      361 agtgggtcat cgtggggtcg cccgtacgag gagaaagccg gtttcggctt ctccctcgac
+      421 gcacgctcct gctacagcct cttccctgta agccaaaact tgacttacat cgaagtgccg
+      481 cagaacgttg cgaaccgggc gtcgaccgaa gtcctgcaaa aggtcaccca gggtaatttt
+      541 aaccttggtg ttgctttagc agaggccagg tcgacagcct cacaactcgc gacgcaaacc
+      601 attgcgctcg tgaaggcgta cactgccgct cgtcgcggta attggcgcca ggcgctccgc
+      661 taccttgccc taaacgaaga tcgaaagttt cgatcaaaac acgtggccgg caggtggttg
+      721 gagttgcagt tcggttggtt accactaatg agtgatatcc agggtgcata tgagatgctt
+      781 acgaaggttc accttcaaga gtttcttcct atgagagccg tacgtcaggt cggtactaac
+      841 atcaagttag atggccgtct gtcgtatcca gctgcaaact tccagacaac gtgcaacata
+      901 tcgcgacgta tcgtgatatg gttttacata aacgatgcac gtttggcatg gttgtcgtct
+      961 ctaggtatct tgaacccact aggtatagtg tgggaaaagg tgcctttctc attcgttgtc
+     1021 gactggctcc tacctgtagg taacatgctc gagggcctta cggcccccgt gggatgctcc
+     1081 tacatgtcag gaacagttac tgacgtaata acgggtgagt ccatcataag cgttgacgct
+     1141 ccctacgggt ggactgtgga gagacagggc actgctaagg cccaaatctc agccatgcat
+     1201 cgaggggtac aatccgtatg gccaacaact ggcgcgtacg taaagtctcc tttctcgatg
+     1261 gtccatacct tagatgcgtt agcattaatc aggcaacggc tctctagata gagccctcaa
+     1321 ccggagtttg aagcatggct tctaacttta ctcagttcgt tctcgtcgac aatggcggaa
+     1381 ctggcgacgt gactgtcgcc ccaagcaact tcgctaacgg ggtcgctgaa tggatcagct
+     1441 ctaactcgcg ttcacaggct tacaaagtaa cctgtagcgt tcgtcagagc tctgcgcaga
+     1501 atcgcaaata caccatcaaa gtcgaggtgc ctaaagtggc aacccagact gttggtggtg
+     1561 tagagcttcc tgtagccgca tggcgttcgt acttaaatat ggaactaacc attccaattt
+     1621 tcgctacgaa ttccgactgc gagcttattg ttaaggcaat gcaaggtctc ctaaaagatg
+     1681 gaaacccgat tccctcagca atcgcagcaa actccggcat ctactaatag acgccggcca
+     1741 ttcaaacatg aggattaccc atgtcgaaga caacaaagaa gttcaactct ttatgtattg
+     1801 atcttcctcg cgatctttct ctcgaaattt accaatcaat tgcttctgtc gctactggaa
+     1861 gcggtgatcc gcacagtgac gactttacag caattgctta cttaagggac gaattgctca
+     1921 caaagcatcc gaccttaggt tctggtaatg acgaggcgac ccgtcgtacc ttagctatcg
+     1981 ctaagctacg ggaggcgaat ggtgatcgcg gtcagataaa tagagaaggt ttcttacatg
+     2041 acaaatcctt gtcatgggat ccggatgttt tacaaaccag catccgtagc cttattggca
+     2101 acctcctctc tggctaccga tcgtcgttgt ttgggcaatg cacgttctcc aacggtgctc
+     2161 ctatggggca caagttgcag gatgcagcgc cttacaagaa gttcgctgaa caagcaaccg
+     2221 ttaccccccg cgctctgaga gcggctctat tggtccgaga ccaatgtgcg ccgtggatca
+     2281 gacacgcggt ccgctataac gagtcatatg aatttaggct cgttgtaggg aacggagtgt
+     2341 ttacagttcc gaagaataat aaaatagatc gggctgcctg taaggagcct gatatgaata
+     2401 tgtacctcca gaaaggggtc ggtgctttca tcagacgccg gctcaaatcc gttggtatag
+     2461 acctgaatga tcaatcgatc aaccagcgtc tggctcagca gggcagcgta gatggttcgc
+     2521 ttgcgacgat agacttatcg tctgcatccg attccatctc cgatcgcctg gtgtggagtt
+     2581 ttctcccacc agagctatat tcatatctcg atcgtatccg ctcacactac ggaatcgtag
+     2641 atggcgagac gatacgatgg gaactatttt ccacaatggg aaatgggttc acatttgagc
+     2701 tagagtccat gatattctgg gcaatagtca aagcgaccca aatccatttt ggtaacgccg
+     2761 gaaccatagg catctacggg gacgatatta tatgtcccag tgagattgca ccccgtgtgc
+     2821 tagaggcact tgcctactac ggttttaaac cgaatcttcg taaaacgttc gtgtccgggc
+     2881 tctttcgcga gagctgcggc gcgcactttt accgtggtgt cgatgtcaaa ccgttttaca
+     2941 tcaagaaacc tgttgacaat ctcttcgccc tgatgctgat attaaatcgg ctacggggtt
+     3001 ggggagttgt cggaggtatg tcagatccac gcctctataa ggtgtgggta cggctctcct
+     3061 cccaggtgcc ttcgatgttc ttcggtggga cggacctcgc tgccgactac tacgtagtca
+     3121 gcccgcctac ggcagtctcg gtatacacca agactccgta cgggcggctg ctcgcggata
+     3181 cccgtacctc gggtttccgt cttgctcgta tcgctcgaga acgcaagttc ttcagcgaaa
+     3241 agcacgacag tggtcgctac atagcgtggt tccatactgg aggtgaaatc accgacagca
+     3301 tgaagtccgc cggcgtgcgc gttatacgca cttcggagtg gctaacgccg gttcccacat
+     3361 tccctcagga gtgtgggcca gcgagctctc ctcggtagct gaccgaggga cccccgtaaa
+     3421 cggggtgggt gtgctcgaaa gagcacgggt gcgaaagcgg tccggctcca ccgaaaggtg
+     3481 ggcgggcttc ggcccaggga cctcccccta aagagaggac ccgggattct cccgatttgg
+     3541 taactagctg cttggctagt taccaccca
+//
+
