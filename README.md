@@ -1,10 +1,10 @@
 # genbank_to
 
 [![Edwards Lab](https://img.shields.io/badge/Bioinformatics-EdwardsLab-03A9F4)](https://edwards.flinders.edu.au/)
-[![DOI](https://www.zenodo.org/badge/60999054.svg)](https://www.zenodo.org/badge/latestdoi/60999054)
+[![DOI](https://www.zenodo.org/badge/481464683.svg)](https://www.zenodo.org/badge/latestdoi/481464683)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 ![GitHub language count](https://img.shields.io/github/languages/count/linsalrob/genbank_to)
-[![PyPi](https://img.shields.io/pypi/pyversions/phispy.svg?style=flat-square&label=PyPi%20Versions)](https://pypi.org/project/genbank_to/)
+[![PyPi](https://img.shields.io/pypi/pyversions/genbank_to.svg?style=flat-square&label=PyPi%20Versions)](https://pypi.org/project/genbank_to/)
 
 A straightforward application to convert NCBI GenBank format files to a swath of other formats. Hopefully we have the 
 format you need, but if not either post [an issue](https://github.com/linsalrob/genbank_to/issues) using our template,
