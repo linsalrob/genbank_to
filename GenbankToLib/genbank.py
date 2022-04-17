@@ -1,6 +1,7 @@
 """
 Read a genbank file and do things with it!
 """
+from typing import Any
 
 import sys
 import re
@@ -9,6 +10,8 @@ import gzip
 from Bio import SeqIO
 from BCBio import GFF  # bcbio-gff package
 import pandas as pd
+from io import StringIO
+import logging
 
 __author__ = 'Rob Edwards'
 __copyright__ = 'Copyright 2020, Rob Edwards'
@@ -364,6 +367,7 @@ def genbank_to_gff(gbkf, out_gff, verbose=False):
     :return: nothing
     """
 
+    logging.info(f"Writing gff3 to {out_gff}")
     with open(out_gff, 'w') as outf:
         """
         for seq in genbank_seqio(gbkf):
@@ -374,3 +378,43 @@ def genbank_to_gff(gbkf, out_gff, verbose=False):
         if verbose:
             sys.stderr.write(f"Parsing {gbkf} to GFF3\n")
         GFF.write(genbank_seqio(gbkf), outf, True)
+
+
+def genbank_to_amrfinder(gbkf, amrout, verbose=False):
+    """
+    Convert the genbank file to amr finder format. This is a bastardized GFF3 format that does
+    not include the ##FASTA header, and also requires all the proteins to be present
+    and have their protein IDs as a "Name" field (caps seem important) in the GFF
+    """
+
+    logging.info(f"AMR: Converting {gbkf} to GFF3")
+    gffstr = StringIO()
+    GFF.write(genbank_seqio(gbkf), gffstr, True)
+    gffstr.seek(0)
+
+    logging.info(f"AMR: Converting {gbkf} to amino acids in {amrout}.faa")
+    seqs = set()
+    with open(f"{amrout}.faa", 'w') as out:
+        for seqid, sid, seq in genbank_to_faa(gbkf, False):
+            seqs.add(sid)
+            out.write(f">{sid}\n{seq}\n")
+
+    logging.info(f"Writing the GFF to {amrout}.gff")
+    search = re.compile(r'protein_id=([\w\.]+)')
+    with open(f"{amrout}.gff", 'w') as out:
+        for r in gffstr:
+            if r.startswith("##FASTA"):
+                break
+            p: List = r.split("\t")
+            if len(p) > 1 and p[2] == 'CDS':
+                m = search.search(p[8])
+                if m and m.groups()[0] in seqs:
+                    out.write(r)
+                elif m:
+                    logging.warn(f"Could not find {m.groups()[0]} in {seqs}")
+                else:
+                    logging.warn(f"Could not parse protein_id from {p[8]}")
+            else:
+                out.write(r)
+
+
