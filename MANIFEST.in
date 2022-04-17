@@ -1,0 +1,2 @@
+include *.md LICENSE VERSION test/NC_001417.gbk
+recursive-include GenbankToLib/ *py
