@@ -198,12 +198,11 @@ def genbank_to_orfs(gbkf, complexheader=False):
             yield seq.id, cid, str(feat.extract(seq).seq)
 
 
-def genbank_to_ptt(gbkf, printout=False, verbose=False):
+def genbank_to_ptt(gbkf, printout=False):
     """
     Convert the genbank file to a table with the same columns of the ptt file
     :param gbkf: the genbank input file
     :param printout: print the table
-    :param verbose: more output
     :return: the table
     """
 
@@ -212,8 +211,6 @@ def genbank_to_ptt(gbkf, printout=False, verbose=False):
     gire = re.compile('GI:(\\d+)')
     cogre = re.compile('(COG\\S+)')
     for seq in genbank_seqio(gbkf):
-        if verbose:
-            sys.stderr.write(f"Parsing {seq.id}\n")
         for feat in seq.features:
             if feat.type != "CDS":
                 continue
@@ -358,7 +355,7 @@ def genbank_to_pandas(gbkf, mincontiglen, ignorepartials=True, convert_selenocys
     return genecalls
 
 
-def genbank_to_gff(gbkf, out_gff, verbose=False):
+def genbank_to_gff(gbkf, out_gff):
     """
     Convert the genbank file to a gff3 format file
     :param gbkf: the genbank input file
@@ -369,18 +366,10 @@ def genbank_to_gff(gbkf, out_gff, verbose=False):
 
     logging.info(f"Writing gff3 to {out_gff}")
     with open(out_gff, 'w') as outf:
-        """
-        for seq in genbank_seqio(gbkf):
-            if verbose:
-                sys.stderr.write(f"Parsing {seq.id} with first seq: {seq.seq[0:10]}\n")
-            GFF.write(seq, outf, True)
-        """
-        if verbose:
-            sys.stderr.write(f"Parsing {gbkf} to GFF3\n")
         GFF.write(genbank_seqio(gbkf), outf, True)
 
 
-def genbank_to_amrfinder(gbkf, amrout, verbose=False):
+def genbank_to_amrfinder(gbkf, amrout):
     """
     Convert the genbank file to amr finder format. This is a bastardized GFF3 format that does
     not include the ##FASTA header, and also requires all the proteins to be present

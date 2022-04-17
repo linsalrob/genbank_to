@@ -11,6 +11,7 @@ from .genbank import genbank_to_faa, genbank_to_fna, genbank_to_orfs, genbank_to
 from .genbank import genbank_to_gff, genbank_to_phage_finder, genbank_seqio, genbank_to_amrfinder
 from Bio import SeqIO
 import logging
+from .version import __version__
 
 __author__ = 'Rob Edwards'
 __copyright__ = 'Copyright 2020, Rob Edwards'
@@ -42,7 +43,7 @@ def run():
     parser.add_argument('-z', '--zip', help='gzip compress the output. Experimental and may not work with everything!',
                         action='store_true')
     parser.add_argument('--log', help='Log file. Default = genbank_to.log', type=str, default='genbank_to.log')
-    parser.add_argument('-v', help='verbose output', action='store_true')
+    parser.add_argument('-v', '--version', action='version', version=__version__)
     args = parser.parse_args()
 
     if not os.path.exists(args.genbank):
@@ -63,8 +64,6 @@ def run():
             out = None
             for sid, seq in genbank_to_fna(args.genbank, args.complex):
                 if args.seqid and sid not in args.seqid:
-                    if args.v:
-                        sys.stderr.write(f"Skipped {sid} not provided in -i options\n")
                     continue
                 if sid != lastid:
                     if out:
@@ -88,8 +87,6 @@ def run():
             out = None
             for seqid, sid, seq in genbank_to_faa(args.genbank, args.complex):
                 if args.seqid and sid not in args.seqid:
-                    if args.v:
-                        sys.stderr.write(f"Skipped {seqid} not provided in -i options\n")
                     continue
                 if seqid != lastid:
                     if out:
@@ -113,8 +110,6 @@ def run():
             out = None
             for seqid, sid, seq in genbank_to_orfs(args.genbank, args.complex):
                 if args.seqid and sid not in args.seqid:
-                    if args.v:
-                        sys.stderr.write(f"Skipped {seqid} not provided in -i options\n")
                     continue
                 if seqid != lastid:
                     if out:
@@ -133,7 +128,7 @@ def run():
         did = True
 
     if args.ptt:
-        r = genbank_to_ptt(args.genbank, False, args.v)
+        r = genbank_to_ptt(args.genbank, False)
         logging.info(f"Writing ptt to {args.ptt}")
         with open(args.ptt, 'w') as out:
             for ln in r:
@@ -164,18 +159,16 @@ def run():
         did = True
 
     if args.gff3:
-        genbank_to_gff(args.genbank, args.gff3, args.v)
+        genbank_to_gff(args.genbank, args.gff3)
         did = True
 
     if args.amr:
-        genbank_to_amrfinder(args.genbank, args.amr, args.v)
+        genbank_to_amrfinder(args.genbank, args.amr)
         did = True
 
     if not did and args.separate:
         for seq in genbank_seqio(args.genbank):
             if args.seqid and seq.id not in args.seqid:
-                if args.v:
-                    sys.stderr.write(f"Skipped {seq.id} not provided in -i options\n")
                 continue
             out = open(f"{seq.id}.gbk", 'w')
             logging.info(f"Writing {seq.id} to {out.name}")
