@@ -60,7 +60,7 @@ def main():
             'bcbio-gff >= 0.6.6'
         ],
         entry_points={
-            "console_scripts": ["genbank_to = GenbankToLib.main:run"]
+            "console_scripts": ["genbank_to = GenBankToLib.main:run"]
         }
 
     )
