@@ -78,3 +78,9 @@ genbank_to -g test/NC_001417.gbk -o test/NC_001417.orfs
 ```bash
 genbank_to -g test/NC_001417.gbk -a test/NC_001417.faa
 ```
+
+4. Do all of these at once
+
+```bash
+genbank_to -g test/NC_001417.gbk -n test/NC_001417.fna -o test/NC_001417.orfs -a test/NC_001417.faa
+```
