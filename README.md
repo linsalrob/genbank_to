@@ -85,3 +85,43 @@ genbank_to -g test/NC_001417.gbk -a test/NC_001417.faa
 ```bash
 genbank_to -g test/NC_001417.gbk -n test/NC_001417.fna -o test/NC_001417.orfs -a test/NC_001417.faa
 ```
+
+# Installation
+
+You can install `genbank_to` in three different ways:
+
+1. Using conda
+
+This is the easiest and recommended method.
+
+```bash
+mamba create -n genbank_to genbank_to
+conda activate genbank_to
+genbank_to --help
+```
+
+2. Using pip
+
+I recommend putting this into a virtual environment:
+
+```bash
+virtualenv venv
+source venv/bin/activate
+pip install genbank_to
+genbank_to --help
+```
+
+3. Directly from this repository
+
+(Not really recommended as things might break)
+
+```bash
+git clone https://github.com/linsalrob/genbank_to.git
+cd genbank_to
+virtualenv venv
+source venv/bin/activate
+python setup.py install
+genbank_to --help
+```
+
+
