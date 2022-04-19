@@ -36,7 +36,7 @@ def main():
         long_description_content_type="text/markdown",
         author="Rob Edwards",
         platforms='any',
-        keywords="genbanke bioinformatics microbiology genome genomics",
+        keywords="genbank bioinformatics microbiology genome genomics",
         author_email="raedwards@gmail.com",
         url='https://github.com/linsalrob/genbank_to',
         license='The MIT License (MIT)',
