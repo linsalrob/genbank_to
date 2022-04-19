@@ -41,11 +41,12 @@ These outputs are assuming you provide a (for example) genome file that contains
  - `-p` or `--ptt` NCBI ptt protein table. This is a somewhat deprecated NCBI format from their genomes downloads
  - `-f` or `--functions` outputs tab separated data of `protein ID` and `protein function` (also called the `product`)
  - `--gff3` outputs GFF3 format
- - `--amr`  outputs a GFF file and an amino acid fasta file as required by [AMR Finder Plus](https://github.com/ncbi/amr/wiki/Running-AMRFinderPlus#examples). Note that this format checks for validity that often crashes AMRFinderPlus
+ - `--amr`  outputs a GFF file, an amino acid fasta file, and a nucleotide fasta file as required by [AMR Finder Plus](https://github.com/ncbi/amr/wiki/Running-AMRFinderPlus#examples). Note that this format checks for validity that often crashes AMRFinderPlus
  - `--phage_finder` outputs a unique format required by [phage_finder](http://phage-finder.sourceforge.net/)
 
 ## Output options
 
+ - `--pseudo` normally we skip pseudogenes (e.g. in creating amino acid fasta files). This will try and include pseudogenes, but often biopython complains and ignores them!
  - `-i` or `--seqid` only output this sequence, or these sequences if you specify more than one `-i`/`--seqid`
  - `-z` or `--zip` compress some of the outputs
  - `--log` write logs to a different file
