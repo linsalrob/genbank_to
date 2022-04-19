@@ -28,22 +28,57 @@ def is_gzip(gbkf):
     :return: true if compressed else false
     """
 
+    t=""
     with open(gbkf, 'rb') as i:
-        return binascii.hexlify(i.read(2)) == b'1f8b'
+        t = i.read(2)
 
+    return binascii.hexlify(t) == b'1f8b'
+
+def cds_details(seq, feat, complexheader=False, skip_pseudo=True):
+    """
+    Extract the feature details, and return them.
+
+    Returns None if not a valid feature, so check return
+    """
+    if feat.type != 'CDS':
+        return None
+
+    cid = feature_id(seq, feat)
+
+    if skip_pseudo and 'pseudo' in feat.qualifiers:
+        # sys.stderr.write(f"Skipped pseudogene in {cid}\n")
+        return None
+
+    if complexheader:
+        (start, stop, strand) = (feat.location.start.position, feat.location.end.position, feat.strand)
+
+        loc = f"{start}_{stop}"
+        if strand < 0:
+            loc = f"{stop}_{start}"
+
+        cid += f' [{seq.id}] '
+        if 'organism' in seq.annotations:
+            cid += f' [{seq.annotations["organism"]}]'
+        cid += f' [{seq.id}_{loc}]'
+        if 'product' in feat.qualifiers:
+            cid += f' {feat.qualifiers["product"][0]}'
+        else:
+            cid += f' [hypothetical protein]'
+
+    return cid
 
 def genbank_seqio(gbkf):
     """
     Get the parser stream
     :param gbkf: genbank file
-    :return:
+    :return: the genbank parser and the file handle (to close it)
     """
 
     if is_gzip(gbkf):
         handle = gzip.open(gbkf, 'rt')
     else:
         handle = open(gbkf, 'r')
-    return SeqIO.parse(handle, "genbank")
+    return SeqIO.parse(handle, "genbank"), handle
 
 
 def feature_id(seq, feat):
@@ -78,14 +113,15 @@ def genbank_to_fna(gbkf, include_definition=False):
     :return: a dict of the sequences
     """
 
-    for seq in genbank_seqio(gbkf):
+    seqs, handle = genbank_seqio(gbkf)
+    for seq in seqs:
         myid = seq.id
         if include_definition:
             myid += " " + seq.description
         yield myid, seq.seq
+    handle.close()
 
-
-def genbank_to_faa(gbkf, complexheader=False):
+def genbank_to_faa(gbkf, complexheader=False, skip_pseudo=True):
     """
     Parse a genbank file
     :param gbkf: the genbank file
@@ -93,57 +129,32 @@ def genbank_to_faa(gbkf, complexheader=False):
     :return: yield the protein id and sequence
     """
 
-    for seq in genbank_seqio(gbkf):
+    seqs, handle = genbank_seqio(gbkf)
+    for seq in seqs:
         for feat in seq.features:
-            if feat.type != 'CDS':
+            cid = cds_details(seq, feat, complexheader, skip_pseudo)
+            if not cid:
                 continue
-            (start, stop, strand) = (feat.location.start.position, feat.location.end.position, feat.strand)
-            prtmtd = {
-                'EC_number': "",
-                'locus_tag': "",
-                'note': "",
-                'product': "",
-                'protein_id': "",
-                'ribosomal_slippage': "",
-                'transl_table': 11,
-                'translation': ""
-            }
-
-            cid = feature_id(seq, feat)
-
-            if complexheader:
-                loc = f"{start}_{stop}"
-                if strand < 0:
-                    loc = f"{stop}_{start}"
-
-                cid += f' [{seq.id}] '
-                if 'organism' in seq.annotations:
-                    cid += f' [{seq.annotations["organism"]}]'
-                cid += f' [{seq.id}_{loc}]'
-                if 'product' in feat.qualifiers:
-                    cid += f' {feat.qualifiers["product"][0]}'
-                else:
-                    cid += f' [hypothetical protein]'
 
             if 'translation' in feat.qualifiers:
                 yield seq.id, cid, feat.qualifiers['translation'][0]
             else:
                 yield seq.id, cid, str(feat.extract(seq).translate().seq)
+    handle.close()
 
-
-def genbank_to_functions(gbkf, seqid=False):
+def genbank_to_functions(gbkf, seqid=False, skip_pseudo=True):
     """
     Parse a genbank file
     :param gbkf: the genbank file
     :param seqid: include the sequence ID in the yield
     :return: yield a tple of [(seqid), protein id, function]
     """
-    for seq in genbank_seqio(gbkf):
+    seqs, handle = genbank_seqio(gbkf)
+    for seq in seqs:
         for feat in seq.features:
-            if feat.type != 'CDS':
+            cid = cds_details(seq, feat, False, skip_pseudo)
+            if not cid:
                 continue
-
-            cid = feature_id(seq, feat)
 
             prod = "Hypothetical protein"
             if "product" in feat.qualifiers:
@@ -153,9 +164,9 @@ def genbank_to_functions(gbkf, seqid=False):
                 yield seq.id, cid, prod
             else:
                 yield cid, prod
+    handle.close()
 
-
-def genbank_to_orfs(gbkf, complexheader=False):
+def genbank_to_orfs(gbkf, complexheader=False, skip_pseudo=True):
     """
     Parse a genbank file
     :param gbkf:
@@ -163,40 +174,15 @@ def genbank_to_orfs(gbkf, complexheader=False):
     :return: a dict of the sequences
     """
 
-    for seq in genbank_seqio(gbkf):
+    seqs, handle = genbank_seqio(gbkf)
+    for seq in seqs:
         for feat in seq.features:
-            if feat.type != 'CDS':
+            cid = cds_details(seq, feat, complexheader, skip_pseudo)
+            if not cid:
                 continue
-            (start, stop, strand) = (feat.location.start.position, feat.location.end.position, feat.strand)
-            prtmtd = {
-                'EC_number': "",
-                'locus_tag': "",
-                'note': "",
-                'product': "",
-                'protein_id': "",
-                'ribosomal_slippage': "",
-                'transl_table': 11,
-                'translation': ""
-            }
-
-            cid = feature_id(seq, feat)
-
-            if complexheader:
-                loc = f"{start}_{stop}"
-                if strand < 0:
-                    loc = f"{stop}_{start}"
-
-                cid += f' [{seq.id}] '
-                if 'organism' in seq.annotations:
-                    cid += f' [{seq.annotations["organism"]}]'
-                cid += f' [{seq.id}_{loc}]'
-                if 'product' in feat.qualifiers:
-                    cid += f' {feat.qualifiers["product"][0]}'
-                else:
-                    cid += f' [hypothetical protein]'
 
             yield seq.id, cid, str(feat.extract(seq).seq)
-
+    handle.close()
 
 def genbank_to_ptt(gbkf, printout=False):
     """
@@ -210,7 +196,8 @@ def genbank_to_ptt(gbkf, printout=False):
 
     gire = re.compile('GI:(\\d+)')
     cogre = re.compile('(COG\\S+)')
-    for seq in genbank_seqio(gbkf):
+    seqs, handle = genbank_seqio(gbkf)
+    for seq in seqs:
         for feat in seq.features:
             if feat.type != "CDS":
                 continue
@@ -245,6 +232,8 @@ def genbank_to_ptt(gbkf, printout=False):
 
             res.append(thisres)
 
+    handle.close()
+
     return res
 
 
@@ -262,7 +251,8 @@ def genbank_to_phage_finder(gbkf):
     :return: yields a tple of this data
     """
 
-    for seq in genbank_seqio(gbkf):
+    seqs, handle = genbank_seqio(gbkf)
+    for seq in seqs:
         for feat in seq.features:
             if feat.type != 'CDS':
                 continue
@@ -271,7 +261,7 @@ def genbank_to_phage_finder(gbkf):
             if 'product' in feat.qualifiers:
                 fn = feat_to_text(feat, 'product')
             yield [seq.id, len(seq.seq), cid, feat.location.start, feat.location.end, fn]
-
+    handle.close()
 
 def genbank_to_pandas(gbkf, mincontiglen, ignorepartials=True, convert_selenocysteine=False):
     """
@@ -296,7 +286,8 @@ def genbank_to_pandas(gbkf, mincontiglen, ignorepartials=True, convert_selenocys
 
     c = 0
     genes = []
-    for seq in genbank_seqio(gbkf):
+    seqs, handle = genbank_seqio(gbkf)
+    for seq in seqs:
         if len(seq) < mincontiglen:
             sys.stderr.write(f"Skipped {seq.id} because it's length ({len(seq)}) is less than "
                              f"the minimum contig length ({mincontiglen})\n")
@@ -349,6 +340,8 @@ def genbank_to_pandas(gbkf, mincontiglen, ignorepartials=True, convert_selenocys
 
             genes.append(row)
 
+    handle.close()
+
     genecalls = pd.DataFrame(genes, columns=['contig', 'id', 'start', 'stop', 'direction', 'partial', 'DNAseq', 'AAseq',
                                              'header'])
 
@@ -366,7 +359,9 @@ def genbank_to_gff(gbkf, out_gff):
 
     logging.info(f"Writing gff3 to {out_gff}")
     with open(out_gff, 'w') as outf:
-        GFF.write(genbank_seqio(gbkf), outf, True)
+        seqs, handle = genbank_seqio(gbkf)
+        GFF.write(seqs, outf, True)
+        handle.close()
 
 
 def genbank_to_amrfinder(gbkf, amrout):
@@ -378,14 +373,21 @@ def genbank_to_amrfinder(gbkf, amrout):
 
     logging.info(f"AMR: Converting {gbkf} to GFF3")
     gffstr = StringIO()
-    GFF.write(genbank_seqio(gbkf), gffstr, True)
+    seqs, handle = genbank_seqio(gbkf)
+    GFF.write(seqs, gffstr, True)
+    handle.close()
     gffstr.seek(0)
 
     logging.info(f"AMR: Converting {gbkf} to amino acids in {amrout}.faa")
     seqs = set()
     with open(f"{amrout}.faa", 'w') as out:
-        for seqid, sid, seq in genbank_to_faa(gbkf, False):
+        for seqid, sid, seq in genbank_to_faa(gbkf, False, skip_pseudo=True):
             seqs.add(sid)
+            out.write(f">{sid}\n{seq}\n")
+
+    logging.info(f"AMR: Converting {gbkf} to nucleotides in {amrout}.fna")
+    with open(f"{amrout}.fna", 'w') as out:
+        for sid, seq in genbank_to_fna(gbkf):
             out.write(f">{sid}\n{seq}\n")
 
     logging.info(f"Writing the GFF to {amrout}.gff")
@@ -398,12 +400,15 @@ def genbank_to_amrfinder(gbkf, amrout):
             if len(p) > 1 and p[2] == 'CDS':
                 m = search.search(p[8])
                 if m and m.groups()[0] in seqs:
-                    out.write(r)
+                    tmp = p[8].rstrip()
+                    tmp += f";Name={m.groups()[0]}\n"
+                    p[8] = tmp
+                    out.write("\t".join(map(str, p)))
                 elif m:
                     logging.warn(f"Could not find {m.groups()[0]} in {seqs}")
+                elif 'pseudo=' in p[8]:
+                    pass
                 else:
                     logging.warn(f"Could not parse protein_id from {p[8]}")
             else:
                 out.write(r)
-
-

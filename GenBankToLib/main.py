@@ -25,7 +25,7 @@ def run():
     """
     The entry point for an application
     """
-    parser = argparse.ArgumentParser(description=" ")
+    parser = argparse.ArgumentParser(description="Convert GenBank format files to...")
     parser.add_argument('-g', '--genbank', help='genbank file', required=True)
     parser.add_argument('-c', '--complex', help='complex identifier line', action='store_true')
     parser.add_argument('-a', '--aminoacids', help="output file for the amino acid sequences")
@@ -38,6 +38,8 @@ def run():
     parser.add_argument('--gff3', help="Output gff3 format")
     parser.add_argument('--amr', help="Output NCBI AMRFinderPlus format (creates a gff file and an faa file)")
     parser.add_argument('--phage_finder', help='make a phage finder file')
+    parser.add_argument('--pseudo', help='include pseudo genes in the output. (This may cause biopython errors).',
+                        action='store_true')
     parser.add_argument('--separate', action='store_true',
                         help='separate output into different files (with no other options just output gbk).')
     parser.add_argument('-z', '--zip', help='gzip compress the output. Experimental and may not work with everything!',
@@ -55,14 +57,14 @@ def run():
         args.separate = True
 
     logging.basicConfig(filename=args.log, level=logging.INFO)
-
+    logging.info(f"Starting genbank_to with {sys.argv}")
 
     did = False
     if args.nucleotide:
         if args.separate:
             lastid = None
             out = None
-            for sid, seq in genbank_to_fna(args.genbank, args.complex):
+            for sid, seq in genbank_to_fna(args.genbank):
                 if args.seqid and sid not in args.seqid:
                     continue
                 if sid != lastid:
@@ -77,7 +79,7 @@ def run():
         else:
             with open(args.nucleotide, 'w') as out:
                 logging.info(f"Writing all nucleotides to {args.nucleotide}")
-                for sid, seq in genbank_to_fna(args.genbank, args.complex):
+                for sid, seq in genbank_to_fna(args.genbank):
                     out.write(f">{sid}\n{seq}\n")
         did = True
 
@@ -85,7 +87,7 @@ def run():
         if args.separate:
             lastid = None
             out = None
-            for seqid, sid, seq in genbank_to_faa(args.genbank, args.complex):
+            for seqid, sid, seq in genbank_to_faa(args.genbank, complexheader=args.complex, skip_pseudo=args.pseudo):
                 if args.seqid and sid not in args.seqid:
                     continue
                 if seqid != lastid:
@@ -100,7 +102,7 @@ def run():
         else:
             with open(args.aminoacids, 'w') as out:
                 logging.info(f"Writing all amino acids to {out.name}")
-                for seqid, sid, seq in genbank_to_faa(args.genbank, args.complex):
+                for seqid, sid, seq in genbank_to_faa(args.genbank, complexheader=args.complex, skip_pseudo=args.pseudo):
                     out.write(f">{sid}\n{seq}\n")
         did = True
 
@@ -108,7 +110,7 @@ def run():
         if args.separate:
             lastid = None
             out = None
-            for seqid, sid, seq in genbank_to_orfs(args.genbank, args.complex):
+            for seqid, sid, seq in genbank_to_orfs(args.genbank, complexheader=args.complex, skip_pseudo=args.pseudo):
                 if args.seqid and sid not in args.seqid:
                     continue
                 if seqid != lastid:
@@ -123,7 +125,7 @@ def run():
         else:
             with open(args.orfs, 'w') as out:
                 logging.info(f"Writing all orfs to {out.name}")
-                for seqid, sid, seq in genbank_to_orfs(args.genbank, args.complex):
+                for seqid, sid, seq in genbank_to_orfs(args.genbank, complexheader=args.complex, skip_pseudo=args.pseudo):
                     out.write(f">{sid}\n{seq}\n")
         did = True
 
