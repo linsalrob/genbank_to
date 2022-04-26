@@ -45,6 +45,7 @@ def run():
     parser.add_argument('-z', '--zip', help='gzip compress the output. Experimental and may not work with everything!',
                         action='store_true')
     parser.add_argument('--log', help='Log file. Default = genbank_to.log', type=str, default='genbank_to.log')
+    parser.add_argument('-d', '--debug', help='enable debugging', action='store_true')
     parser.add_argument('-v', '--version', action='version', version=__version__)
     args = parser.parse_args()
 
@@ -56,7 +57,11 @@ def run():
         sys.stderr.write("-i was provided, so requiring to separate files (--separate assumed)\n")
         args.separate = True
 
-    logging.basicConfig(filename=args.log, level=logging.INFO)
+    loglevel = logging.INFO
+    if args.debug:
+        loglevel = logging.DEBUG
+
+    logging.basicConfig(filename=args.log, level=loglevel)
     logging.info(f"Starting genbank_to with {sys.argv}")
 
     did = False

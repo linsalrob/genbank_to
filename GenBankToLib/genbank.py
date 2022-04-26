@@ -135,9 +135,11 @@ def genbank_to_faa(gbkf, complexheader=False, skip_pseudo=True):
             cid = cds_details(seq, feat, complexheader, skip_pseudo)
             if not cid:
                 continue
-
+            
             if 'translation' in feat.qualifiers:
                 yield seq.id, cid, feat.qualifiers['translation'][0]
+            elif len(feat.extract(seq).seq) % 3 != 0:
+                logging.debug(f"WARNING: Length of {seq.id} --> {cid} is not a multiple of 3 (it is {len(feat.extract(seq).seq)})")
             else:
                 yield seq.id, cid, str(feat.extract(seq).translate().seq)
     handle.close()
@@ -405,10 +407,10 @@ def genbank_to_amrfinder(gbkf, amrout):
                     p[8] = tmp
                     out.write("\t".join(map(str, p)))
                 elif m:
-                    logging.warn(f"Could not find {m.groups()[0]} in {seqs}")
+                    logging.debug(f"Could not find {m.groups()[0]} in {seqs}")
                 elif 'pseudo=' in p[8]:
                     pass
                 else:
-                    logging.warn(f"Could not parse protein_id from {p[8]}")
+                    logging.debug(f"Could not parse protein_id from {p[8]}")
             else:
                 out.write(r)
