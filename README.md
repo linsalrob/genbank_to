@@ -11,6 +11,9 @@ format you need, but if not either post [an issue](https://github.com/linsalrob/
 or if you have already got it working, post [a PR](https://github.com/linsalrob/genbank_to/pulls) so we can add it and
 add you to the project.
 
+You might also be interested [deprekate's](https://github.com/deprekate/) package called [genbank](https://github.com/deprekate/genbank) which includes
+several of the features here, and you can `import genbank` into your Python projects.
+
 # What it does
 
 Read an NCBI GenBank format file (like our [test data](test/NC_001417.gbk)) and convert it to one of many
