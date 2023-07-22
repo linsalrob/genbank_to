@@ -64,6 +64,9 @@ def cds_details(seq, feat, complexheader=False, skip_pseudo=True):
             cid += f' {feat.qualifiers["product"][0]}'
         else:
             cid += f' [hypothetical protein]'
+        if 'db_xref' in feat.qualifiers:
+            dbs = "; ".join(feat.qualifiers["db_xref"])
+            cid += f" [{dbs}]"
 
     return cid
 
@@ -140,6 +143,7 @@ def genbank_to_faa(gbkf, complexheader=False, skip_pseudo=True):
                 yield seq.id, cid, feat.qualifiers['translation'][0]
             elif len(feat.extract(seq).seq) % 3 != 0:
                 logging.debug(f"WARNING: Length of {seq.id} --> {cid} is not a multiple of 3 (it is {len(feat.extract(seq).seq)})")
+                continue
             else:
                 yield seq.id, cid, str(feat.extract(seq).translate().seq)
     handle.close()
