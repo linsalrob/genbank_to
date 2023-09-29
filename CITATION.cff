@@ -1,0 +1,9 @@
+cff-version: 1.1.0
+message: "If you use this software, please cite it as below."
+authors:
+  - family-names: Edwards
+    given-names: Robert
+    orcid: https://orcid.org/0000-0001-8383-8949
+title: linsalrob/genbank_to: AMRFinder Goodness
+version: v0.4
+date-released: 2022-04-19
