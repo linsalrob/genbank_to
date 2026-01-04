@@ -3,7 +3,7 @@
 Convert GenBank files to JSON format with comprehensive metadata and features.
 
 This module reads GenBank files (containing one or multiple records/contigs) using Biopython
-and writes a single JSON file matching a specific schema.
+and writes a single JSON file matching a specific schema compatible with Bakta JSON format.
 
 Coordinate System:
     Uses 1-based inclusive coordinates (start, stop) for features.
@@ -16,7 +16,7 @@ GC Content:
     Calculated as (G+C) / (A+C+G+T), ignoring N and other ambiguous bases.
 
 Hash Digest:
-    SHA256 hexdigest is used for amino acid sequences.
+    MD5 hexdigest is used for amino acid sequences (Bakta compatible).
 """
 
 import sys
@@ -28,6 +28,24 @@ from Bio import SeqIO
 from Bio.Seq import Seq
 from Bio.SeqFeature import SeqFeature
 from Bio.SeqRecord import SeqRecord
+
+try:
+    from Bio.SeqUtils import molecular_weight
+    from Bio.SeqUtils.IsoelectricPoint import IsoelectricPoint
+    HAS_SEQ_UTILS = True
+except ImportError:
+    HAS_SEQ_UTILS = False
+
+try:
+    from .bacteria import gram_positive, gram_negative
+except ImportError:
+    # If running as standalone script
+    try:
+        from bacteria import gram_positive, gram_negative
+    except ImportError:
+        # Define minimal sets if bacteria.py not available
+        gram_positive = set()
+        gram_negative = set()
 
 __author__ = 'Rob Edwards'
 __copyright__ = 'Copyright 2020, Rob Edwards'
@@ -115,7 +133,7 @@ def extract_genome_metadata(records: List[SeqRecord], args: argparse.Namespace) 
     """
     Extract genome-level metadata from records and command-line arguments.
     
-    Priority: command-line args > GenBank annotations
+    Priority: command-line args > GenBank annotations > gram stain inference
     
     Args:
         records: List of SeqRecord objects
@@ -129,7 +147,7 @@ def extract_genome_metadata(records: List[SeqRecord], args: argparse.Namespace) 
         "species": "NA",
         "strain": "NA",
         "complete": False,
-        "gram": "NA",
+        "gram": "?",
         "translation_table": 11  # Default bacterial translation table
     }
     
@@ -146,6 +164,8 @@ def extract_genome_metadata(records: List[SeqRecord], args: argparse.Namespace) 
                 genome['genus'] = parts[0]
             if len(parts) >= 2:
                 genome['species'] = parts[1]
+            if len(parts) >= 3:
+                genome['strain'] = ' '.join(parts[2:])
         
         # Check for completeness
         if 'comment' in annotations:
@@ -153,11 +173,22 @@ def extract_genome_metadata(records: List[SeqRecord], args: argparse.Namespace) 
             if 'complete' in comment:
                 genome['complete'] = True
         
+        # Check description for completeness
+        if record.description and 'complete genome' in record.description.lower():
+            genome['complete'] = True
+        
         # Check topology for completeness indication
         for rec in records:
             if rec.annotations.get('topology', '').lower() == 'circular':
                 genome['complete'] = True
                 break
+        
+        # Infer gram stain from genus if not provided
+        if genome['genus'] != "NA" and not args.gram:
+            if genome['genus'] in gram_positive:
+                genome['gram'] = '+'
+            elif genome['genus'] in gram_negative:
+                genome['gram'] = '-'
     
     # Override with command-line arguments if provided
     if args.genus:
@@ -357,8 +388,18 @@ def create_feature_object(feature: SeqFeature, record: SeqRecord,
         
         if aa_seq:
             feat_obj['aa'] = aa_seq
-            # Calculate sha256 hexdigest
-            feat_obj['aa_hexdigest'] = hashlib.sha256(aa_seq.encode()).hexdigest()
+            # Calculate MD5 hexdigest (Bakta compatible)
+            feat_obj['aa_hexdigest'] = hashlib.md5(aa_seq.encode()).hexdigest()
+            
+            # Calculate protein sequence statistics
+            if HAS_SEQ_UTILS:
+                try:
+                    seq_stats = {}
+                    seq_stats['molecular_weight'] = molecular_weight(aa_seq, seq_type="protein")
+                    seq_stats['isoelectric_point'] = IsoelectricPoint(aa_seq).pi()
+                    feat_obj['seq_stats'] = seq_stats
+                except Exception:
+                    pass
         
         # Check if hypothetical
         product = feat_obj.get('product', '')
@@ -377,9 +418,20 @@ def create_feature_object(feature: SeqFeature, record: SeqRecord,
         else:
             feat_obj['rbs_motif'] = "NA"
         
-        # Check for truncated
+        # Better truncation detection
+        truncated = None
+        if aa_seq:
+            if not aa_seq.startswith('M'):
+                truncated = '5-prime'
+            if aa_seq.endswith('*'):
+                truncated = '3-prime'
+            if truncated:
+                feat_obj['truncated'] = truncated
+        
+        # Check for truncated/pseudo in qualifiers
         if 'truncated' in qualifiers or 'pseudo' in qualifiers:
-            feat_obj['truncated'] = True
+            if not truncated:
+                feat_obj['truncated'] = True
     
     # tRNA-specific handling
     if feature.type == 'tRNA':
@@ -417,6 +469,44 @@ def create_feature_object(feature: SeqFeature, record: SeqRecord,
     return feat_obj
 
 
+def calculate_coding_ratio_accurate(records: List[SeqRecord]) -> float:
+    """
+    Calculate coding ratio by marking all coding bases in the genome.
+    
+    This method creates a mask for each base and marks it as coding if it's
+    part of any CDS feature, providing a more accurate coding density measure.
+    
+    Args:
+        records: List of SeqRecord objects
+        
+    Returns:
+        Coding ratio (0.0 to 1.0)
+    """
+    total_coding = 0
+    total_bases = 0
+    
+    for record in records:
+        seq_len = len(record.seq)
+        total_bases += seq_len
+        coding_mask = [False] * seq_len
+        
+        for feature in record.features:
+            if feature.type != 'CDS':
+                continue
+            
+            start = int(feature.location.start)  # 0-based inclusive
+            end = int(feature.location.end)      # 0-based exclusive
+            
+            # Mark all bases covered by this CDS as coding
+            for i in range(start, end):
+                if i < seq_len:  # Safety check
+                    coding_mask[i] = True
+        
+        total_coding += sum(coding_mask)
+    
+    return total_coding / total_bases if total_bases > 0 else 0.0
+
+
 def calculate_stats(records: List[SeqRecord], features: List[Dict[str, Any]]) -> Dict[str, Any]:
     """
     Calculate genome statistics.
@@ -433,11 +523,8 @@ def calculate_stats(records: List[SeqRecord], features: List[Dict[str, Any]]) ->
     
     total_size = sum(lengths)
     
-    # Calculate coding bases (sum of CDS lengths)
-    coding_bases = 0
-    for feat in features:
-        if feat['type'] == 'CDS' and 'nt' in feat:
-            coding_bases += len(feat['nt'])
+    # Calculate coding ratio using accurate base-by-base method
+    coding_ratio = calculate_coding_ratio_accurate(records)
     
     stats = {
         "no_sequences": len(records),
@@ -445,7 +532,7 @@ def calculate_stats(records: List[SeqRecord], features: List[Dict[str, Any]]) ->
         "gc": calculate_gc_content(sequences),
         "n_ratio": calculate_n_ratio(sequences),
         "n50": calculate_n50(lengths),
-        "coding_ratio": coding_bases / total_size if total_size > 0 else 0.0
+        "coding_ratio": coding_ratio
     }
     
     return stats
