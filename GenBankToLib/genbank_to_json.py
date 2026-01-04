@@ -4,6 +4,19 @@ Convert GenBank files to JSON format with comprehensive metadata and features.
 
 This module reads GenBank files (containing one or multiple records/contigs) using Biopython
 and writes a single JSON file matching a specific schema.
+
+Coordinate System:
+    Uses 1-based inclusive coordinates (start, stop) for features.
+    BioPython's 0-based half-open [start, end) is converted to 1-based [start, stop].
+
+Frame Convention:
+    Frame is 0-based (0, 1, 2) derived from GenBank's codon_start (1, 2, 3).
+
+GC Content:
+    Calculated as (G+C) / (A+C+G+T), ignoring N and other ambiguous bases.
+
+Hash Digest:
+    SHA256 hexdigest is used for amino acid sequences.
 """
 
 import sys
@@ -12,6 +25,7 @@ import argparse
 import hashlib
 from typing import List, Dict, Any, Optional
 from Bio import SeqIO
+from Bio.Seq import Seq
 from Bio.SeqFeature import SeqFeature
 from Bio.SeqRecord import SeqRecord
 
@@ -225,7 +239,8 @@ def extract_feature_sequence(feature: SeqFeature, record: SeqRecord) -> str:
     """
     try:
         return str(feature.extract(record.seq))
-    except Exception:
+    except (ValueError, AttributeError) as e:
+        # Log or handle specific extraction errors
         return ""
 
 
@@ -240,8 +255,6 @@ def translate_sequence(nt_seq: str, translation_table: int) -> str:
     Returns:
         Amino acid sequence
     """
-    from Bio.Seq import Seq
-    
     try:
         # Remove incomplete codons at the end
         complete_codons = (len(nt_seq) // 3) * 3
@@ -251,7 +264,8 @@ def translate_sequence(nt_seq: str, translation_table: int) -> str:
             # Remove trailing stop codons
             return aa_seq.rstrip('*')
         return ""
-    except Exception:
+    except (ValueError, KeyError) as e:
+        # Handle invalid translation table or invalid nucleotide sequence
         return ""
 
 
@@ -277,13 +291,23 @@ def create_feature_object(feature: SeqFeature, record: SeqRecord,
     
     qualifiers = feature.qualifiers
     
+    # Determine strand
+    if feature.location.strand is None:
+        strand = 0
+    elif feature.location.strand >= 0:
+        strand = 1
+    else:
+        strand = -1
+    
     # Base feature object
+    # Coordinates: BioPython uses 0-based half-open intervals [start, end)
+    # We convert to 1-based inclusive: start+1, end (end is already correct)
     feat_obj = {
         "type": feature.type,
         "contig": record.id,
         "start": int(feature.location.start) + 1,  # Convert to 1-based
-        "stop": int(feature.location.end),  # End is already exclusive in BioPython, so this is correct for 1-based inclusive
-        "strand": 1 if feature.location.strand >= 0 else -1 if feature.location.strand else 0
+        "stop": int(feature.location.end),  # Already correct for 1-based inclusive
+        "strand": strand
     }
     
     # Extract common qualifiers
