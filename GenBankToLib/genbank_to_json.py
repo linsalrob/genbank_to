@@ -419,19 +419,20 @@ def create_feature_object(feature: SeqFeature, record: SeqRecord,
             feat_obj['rbs_motif'] = "NA"
         
         # Better truncation detection
-        truncated = None
+        truncated_parts = []
         if aa_seq:
             if not aa_seq.startswith('M'):
-                truncated = '5-prime'
+                truncated_parts.append('5-prime')
             if aa_seq.endswith('*'):
-                truncated = '3-prime'
-            if truncated:
-                feat_obj['truncated'] = truncated
+                truncated_parts.append('3-prime')
+            
+            if truncated_parts:
+                # Join multiple truncation types if both exist
+                feat_obj['truncated'] = '-'.join(truncated_parts)
         
         # Check for truncated/pseudo in qualifiers
-        if 'truncated' in qualifiers or 'pseudo' in qualifiers:
-            if not truncated:
-                feat_obj['truncated'] = True
+        if ('truncated' in qualifiers or 'pseudo' in qualifiers) and 'truncated' not in feat_obj:
+            feat_obj['truncated'] = 'unknown'
     
     # tRNA-specific handling
     if feature.type == 'tRNA':
