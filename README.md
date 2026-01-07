@@ -123,7 +123,7 @@ git clone https://github.com/linsalrob/genbank_to.git
 cd genbank_to
 virtualenv venv
 source venv/bin/activate
-python setup.py install
+pip install .
 genbank_to --help
 ```
 
