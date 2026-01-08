@@ -95,6 +95,21 @@ Extract Functions
    for protid, function in genbank_to_functions('genome.gbk'):
        print(f"{protid}\t{function}")
 
+Convert to JSON Format
+~~~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: python
+
+   from GenBankToLib import genbank_to_json
+   import json
+   
+   genome_info = {'gram': None, 'translation_table': 11}
+   json_data = genbank_to_json('genome.gbk', genome_info)
+   
+   # Save to file
+   with open('genome.json', 'w') as f:
+       json.dump(json_data, f, indent=2)
+
 Example Workflow
 ----------------
 

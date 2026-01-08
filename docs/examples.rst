@@ -170,7 +170,8 @@ Basic Library Import
        genbank_to_fna,
        genbank_to_orfs,
        genbank_to_functions,
-       genbank_to_gff
+       genbank_to_gff,
+       genbank_to_json
    )
 
 Extract and Filter Proteins
@@ -220,6 +221,44 @@ Calculate Genome Statistics
    # Count proteins
    protein_count = sum(1 for _ in genbank_to_faa('genome.gbk'))
    print(f"Proteins: {protein_count}")
+
+Export to JSON Format
+~~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: python
+
+   from GenBankToLib import genbank_to_json
+   import json
+   
+   # Convert GenBank to comprehensive JSON format
+   genome_info = {
+       'gram': '-',
+       'translation_table': 11
+   }
+   
+   json_data = genbank_to_json('genome.gbk', genome_info)
+   
+   # Access genome metadata
+   print(f"Organism: {json_data['genome']['genus']} {json_data['genome']['species']}")
+   print(f"Gram: {json_data['genome']['gram']}")
+   
+   # Access statistics
+   stats = json_data['stats']
+   print(f"Genome size: {stats['size']:,} bp")
+   print(f"GC content: {stats['gc']:.2%}")
+   print(f"Coding ratio: {stats['coding_ratio']:.2%}")
+   print(f"N50: {stats['n50']:,}")
+   
+   # Filter features by type
+   cds_count = sum(1 for f in json_data['features'] if f['type'] == 'CDS')
+   trna_count = sum(1 for f in json_data['features'] if f['type'] == 'tRNA')
+   rrna_count = sum(1 for f in json_data['features'] if f['type'] == 'rRNA')
+   
+   print(f"CDS: {cds_count}, tRNA: {trna_count}, rRNA: {rrna_count}")
+   
+   # Save to file
+   with open('genome_complete.json', 'w') as f:
+       json.dump(json_data, f, indent=2)
 
 Merge Multiple Genomes
 ~~~~~~~~~~~~~~~~~~~~~~~

@@ -219,6 +219,19 @@ Bakta JSON
 - Web applications
 - Database storage
 
+**Python API**:
+
+For programmatic access, use the ``genbank_to_json`` function from the library:
+
+.. code-block:: python
+
+   from GenBankToLib import genbank_to_json
+   
+   genome_info = {'gram': '-', 'translation_table': 11}
+   json_data = genbank_to_json('genome.gbk', genome_info)
+
+See the :doc:`api` documentation for detailed information on the ``genbank_to_json`` function.
+
 AMRFinderPlus Format
 ~~~~~~~~~~~~~~~~~~~~
 
