@@ -14,8 +14,8 @@ This page documents the Python library API for genbank_to. All functions can be 
        genbank_to_gff,
        genbank_to_phage_finder,
        genbank_to_amrfinder,
-       genbank_to_json,
-       genbank_seqio
+       genbank_seqio,
+       genbank_to_json
    )
 
 Core Functions
@@ -385,9 +385,9 @@ The output JSON contains the following structure:
 
 - The JSON format is compatible with Bakta annotation output
 - Coordinates are 1-based inclusive (start, stop)
-- Frame is 0-based (0, 1, 2) derived from GenBank's codon_start
+- Frame is 0-based (0, 1, 2) where GenBank codon_start values 1, 2, 3 are converted to frame values 0, 1, 2 respectively
 - GC content is calculated as (G+C)/(A+C+G+T), ignoring ambiguous bases
-- MD5 hexdigest is provided for amino acid sequences
+- MD5 hexdigest is provided for amino acid sequences in the ``aa_hexdigest`` field
 - Gram stain can be inferred from genus if not provided
 
 genbank_seqio
