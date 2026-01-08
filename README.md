@@ -5,6 +5,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 ![GitHub language count](https://img.shields.io/github/languages/count/linsalrob/genbank_to)
 [![PyPi](https://img.shields.io/pypi/pyversions/genbank_to.svg?style=flat-square&label=PyPi%20Versions)](https://pypi.org/project/genbank_to/)
+[![Documentation Status](https://readthedocs.org/projects/genbank-to/badge/?version=latest)](https://genbank-to.readthedocs.io/en/latest/?badge=latest)
 
 A straightforward application to convert NCBI GenBank format files to a swath of other formats. Hopefully we have the 
 format you need, but if not either post [an issue](https://github.com/linsalrob/genbank_to/issues) using our template,
@@ -13,6 +14,12 @@ add you to the project.
 
 You might also be interested [deprekate's](https://github.com/deprekate/) package called [genbank](https://github.com/deprekate/genbank) which includes
 several of the features here, and you can `import genbank` into your Python projects.
+
+## Documentation
+
+For comprehensive documentation, including installation instructions, usage examples, and API reference, please visit:
+
+**[https://genbank-to.readthedocs.io](https://genbank-to.readthedocs.io)**
 
 # What it does
 
@@ -142,4 +149,14 @@ pip install .
 genbank_to --help
 ```
 
+# More Information
+
+For detailed documentation, including:
+- Comprehensive usage examples
+- Complete API reference for the Python library
+- All output format specifications
+- Contributing guidelines
+- And much more!
+
+Please visit our documentation at **[https://genbank-to.readthedocs.io](https://genbank-to.readthedocs.io)**
 
