@@ -14,6 +14,7 @@ This page documents the Python library API for genbank_to. All functions can be 
        genbank_to_gff,
        genbank_to_phage_finder,
        genbank_to_amrfinder,
+       genbank_to_json,
        genbank_seqio
    )
 
@@ -265,6 +266,130 @@ Convert GenBank file to AMRFinderPlus format.
    genbank_to_amrfinder('genome.gbk', 'output')
    # Creates: output.gff, output.faa, output.fna
 
+genbank_to_json
+~~~~~~~~~~~~~~~
+
+.. code-block:: python
+
+   genbank_to_json(genbank_path, genome_info)
+
+Convert GenBank file to JSON format with comprehensive metadata.
+
+**Parameters:**
+
+- ``genbank_path`` (str): Path to the GenBank file.
+- ``genome_info`` (dict): Dictionary containing optional genome information:
+  
+  - ``gram`` (str or None): Gram stain result ('+' for Gram-positive, '-' for Gram-negative, or None to infer)
+  - ``translation_table`` (int or None): NCBI translation table number (default: 11)
+
+**Returns:**
+
+- ``dict``: Complete JSON data structure containing:
+  
+  - ``genome``: Genome metadata (genus, species, strain, gram, translation_table, complete)
+  - ``stats``: Genome statistics (no_sequences, size, gc, n_ratio, n50, coding_ratio)
+  - ``features``: List of feature dictionaries (CDS, tRNA, rRNA, tmRNA, ncRNA)
+  - ``sequences``: List of sequence objects with metadata
+  - ``version``: Version information
+
+**Example:**
+
+.. code-block:: python
+
+   from GenBankToLib import genbank_to_json
+   import json
+   
+   # Basic usage with defaults
+   genome_info = {
+       'gram': None,
+       'translation_table': 11
+   }
+   json_data = genbank_to_json('genome.gbk', genome_info)
+   
+   # Save to file
+   with open('genome.json', 'w') as f:
+       json.dump(json_data, f, indent=2)
+   
+   # Specify Gram stain and translation table
+   genome_info = {
+       'gram': '-',
+       'translation_table': 11
+   }
+   json_data = genbank_to_json('ecoli.gbk', genome_info)
+   
+   # Access the data
+   print(f"Genome: {json_data['genome']['genus']} {json_data['genome']['species']}")
+   print(f"Size: {json_data['stats']['size']} bp")
+   print(f"GC content: {json_data['stats']['gc']:.2%}")
+   print(f"Features: {len(json_data['features'])}")
+
+**JSON Output Structure:**
+
+The output JSON contains the following structure:
+
+.. code-block:: json
+
+   {
+       "genome": {
+           "genus": "Escherichia",
+           "species": "coli",
+           "strain": "K-12",
+           "complete": true,
+           "gram": "-",
+           "translation_table": 11
+       },
+       "stats": {
+           "no_sequences": 1,
+           "size": 4641652,
+           "gc": 0.5079,
+           "n_ratio": 0.0,
+           "n50": 4641652,
+           "coding_ratio": 0.8756
+       },
+       "features": [
+           {
+               "type": "CDS",
+               "contig": "NC_000913",
+               "start": 190,
+               "stop": 255,
+               "strand": 1,
+               "gene": "thrL",
+               "locus": "b0001",
+               "product": "thr operon leader peptide",
+               "nt": "ATGAAACGC...",
+               "aa": "MKRISTT...",
+               "aa_hexdigest": "abc123...",
+               "frame": 0,
+               "start_type": "ATG",
+               "rbs_motif": "AGGAG"
+           }
+       ],
+       "sequences": [
+           {
+               "id": "NC_000913",
+               "description": "Escherichia coli str. K-12 substr. MG1655, complete genome",
+               "sequence": "AGCTTTTCATTC...",
+               "length": 4641652,
+               "complete": true,
+               "type": "chromosome",
+               "topology": "circular"
+           }
+       ],
+       "version": {
+           "genbank_to": "1.2.3"
+       }
+   }
+
+**Notes:**
+
+- The JSON format is compatible with Bakta annotation output
+- Coordinates are 1-based inclusive (start, stop)
+- Frame is 0-based (0, 1, 2) derived from GenBank's codon_start
+- GC content is calculated as (G+C)/(A+C+G+T), ignoring ambiguous bases
+- MD5 hexdigest is provided for amino acid sequences
+- Gram stain can be inferred from genus if not provided
+
 genbank_seqio
 ~~~~~~~~~~~~~
 
@@ -413,25 +538,31 @@ Custom Processing Pipeline
 
 .. code-block:: python
 
-   from GenBankToLib import genbank_to_faa, genbank_to_functions
+   from GenBankToLib import genbank_to_json
    import json
    
-   # Build a comprehensive protein database
-   protein_db = {}
+   # Build a comprehensive genome database with genbank_to_json
+   genome_info = {
+       'gram': '-',
+       'translation_table': 11
+   }
    
-   # Get sequences
-   for seqid, protid, sequence in genbank_to_faa('genome.gbk'):
-       if protid not in protein_db:
-           protein_db[protid] = {'sequence': str(sequence), 'length': len(sequence)}
+   # Convert to JSON format
+   genome_data = genbank_to_json('genome.gbk', genome_info)
    
-   # Add functions
-   for protid, function in genbank_to_functions('genome.gbk'):
-       if protid in protein_db:
-           protein_db[protid]['function'] = function
+   # Process the data
+   print(f"Genome: {genome_data['genome']['genus']} {genome_data['genome']['species']}")
+   print(f"Total size: {genome_data['stats']['size']} bp")
+   print(f"GC content: {genome_data['stats']['gc']:.2%}")
+   print(f"Coding ratio: {genome_data['stats']['coding_ratio']:.2%}")
    
-   # Save to JSON
-   with open('protein_database.json', 'w') as f:
-       json.dump(protein_db, f, indent=2)
+   # Extract specific features
+   cds_features = [f for f in genome_data['features'] if f['type'] == 'CDS']
+   print(f"CDS features: {len(cds_features)}")
+   
+   # Save to JSON file
+   with open('genome_analysis.json', 'w') as f:
+       json.dump(genome_data, f, indent=2)
 
 Working with BioPython
 ~~~~~~~~~~~~~~~~~~~~~~
