@@ -45,20 +45,20 @@ def run():
     bakta_group = parser.add_argument_group("BAKTA JSON metadata (requires --bakta-json)")
     # JSON-only arguments (Bakta metadata)
     bakta_group.add_argument('--bakta-version', default=None,
-                        help='Bakta version string (default: NA) [requires --json]')
+                        help='Bakta version string (default: NA) [requires --bakta-json]')
     bakta_group.add_argument('--db-version', default=None,
-                        help='Database version string (default: NA) [requires --json]')
+                        help='Database version string (default: NA) [requires --bakta-json]')
 
     bakta_group.add_argument('--genus', default=None,
-                        help='Genus name (overrides GenBank annotation) [requires --json]')
+                        help='Genus name (overrides GenBank annotation) [requires --bakta-json]')
     bakta_group.add_argument('--species', default=None,
-                        help='Species name (overrides GenBank annotation) [requires --json]')
+                        help='Species name (overrides GenBank annotation) [requires --bakta-json]')
     bakta_group.add_argument('--strain', default=None,
-                        help='Strain name (overrides GenBank annotation) [requires --json]')
+                        help='Strain name (overrides GenBank annotation) [requires --bakta-json]')
     bakta_group.add_argument('--gram', default=None, choices=['+', '-'],
-                        help='Gram stain (+ or -) [requires --json]')
+                        help='Gram stain (+ or -) [requires --bakta-json]')
     bakta_group.add_argument('--translation-table', type=int, default=None,
-                        help='NCBI translation table number (default: 11) [requires --json]')
+                        help='NCBI translation table number (default: 11) [requires --bakta-json]')
 
 
     parser.add_argument('--pseudo', help='include pseudo genes in the output. (This may cause biopython errors).',
@@ -89,7 +89,6 @@ def run():
                 if getattr(args, name) is not None]
         if used:
             parser.error(f"{', '.join(used)} require --bakta-json")
-            sys.exit(1)
 
     loglevel = logging.INFO
     if args.debug:

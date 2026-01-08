@@ -18,7 +18,7 @@ GC Content:
 Hash Digest:
     MD5 hexdigest is used for amino acid sequences (Bakta compatible).
 """
-
+import logging
 import sys
 import json
 import argparse
@@ -374,6 +374,7 @@ def create_feature_object(feature: SeqFeature, record: SeqRecord,
                 codon_start = int(qualifiers['codon_start'][0])
                 feat_obj['frame'] = codon_start - 1  # Convert 1-based to 0-based
             except (ValueError, IndexError):
+                # If codon_start is missing or malformed, fall back to the default frame (0)
                 pass
         
         # Extract or translate amino acid sequence
@@ -399,6 +400,7 @@ def create_feature_object(feature: SeqFeature, record: SeqRecord,
                     seq_stats['isoelectric_point'] = IsoelectricPoint(aa_seq).pi()
                     feat_obj['seq_stats'] = seq_stats
                 except Exception:
+                    # SeqUtils failures should not break JSON export; omit optional seq_stats on error.
                     pass
         
         # Check if hypothetical
@@ -406,11 +408,19 @@ def create_feature_object(feature: SeqFeature, record: SeqRecord,
         if 'hypothetical' in product.lower():
             feat_obj['hypothetical'] = True
         
-        # Extract start_type
-        if 'codon_start' in qualifiers:
-            feat_obj['start_type'] = qualifiers['codon_start'][0]
-        else:
-            feat_obj['start_type'] = "NA"
+        # Extract start_type based on actual start codon, if available
+        start_type = "NA"
+        if nt_seq:
+            # Use frame offset (0, 1, 2) to determine the first codon
+            frame_offset = feat_obj.get('frame', 0)
+            try:
+                frame_offset_int = int(frame_offset)
+            except (TypeError, ValueError):
+                frame_offset_int = 0
+            if len(nt_seq) >= frame_offset_int + 3:
+                start_codon = nt_seq[frame_offset_int:frame_offset_int + 3]
+                start_type = str(start_codon).upper()
+        feat_obj['start_type'] = start_type
         
         # Extract rbs_motif
         if 'ribosome_binding_site' in qualifiers:
@@ -419,12 +429,30 @@ def create_feature_object(feature: SeqFeature, record: SeqRecord,
             feat_obj['rbs_motif'] = "NA"
         
         # Better truncation detection
+        # Use an unstripped translation (including stop codon) when possible
+        raw_aa_seq: Optional[str] = None
+        if nt_seq:
+            frame_offset = feat_obj.get('frame', 0)
+            try:
+                raw_aa_seq = str(Seq(nt_seq[frame_offset:]).translate(table=translation_table))
+            except Exception:
+                # If translation fails for any reason, fall back to aa_seq-based heuristics only
+                raw_aa_seq = None
         truncated_parts = []
         if aa_seq:
             if not aa_seq.startswith('M'):
                 truncated_parts.append('5-prime')
-            if aa_seq.endswith('*'):
-                truncated_parts.append('3-prime')
+            # 3-prime truncation detection:
+            # - Prefer the raw translation (including stop codon) if available.
+            #   A missing terminal '*' indicates a 3-prime truncation.
+            # - If raw translation is unavailable, fall back to checking aa_seq
+            #   (this may still contain '*' when taken directly from qualifiers).
+            if raw_aa_seq is not None:
+                if not raw_aa_seq.endswith('*'):
+                    truncated_parts.append('3-prime')
+            else:
+                if aa_seq.endswith('*'):
+                    truncated_parts.append('3-prime')
             
             if truncated_parts:
                 # Join multiple truncation types if both exist
@@ -433,30 +461,35 @@ def create_feature_object(feature: SeqFeature, record: SeqRecord,
         # Check for truncated/pseudo in qualifiers
         if ('truncated' in qualifiers or 'pseudo' in qualifiers) and 'truncated' not in feat_obj:
             feat_obj['truncated'] = 'unknown'
-    
-    # tRNA-specific handling
-    if feature.type == 'tRNA':
-        if 'product' in qualifiers:
-            # Try to extract amino acid from product
-            product = qualifiers['product'][0]
-            if 'tRNA-' in product:
-                aa = product.split('tRNA-')[1].split()[0]
-                feat_obj['amino_acid'] = aa
-        
-        # Extract anticodon information
-        if 'anticodon' in qualifiers:
-            anticodon_info = qualifiers['anticodon'][0]
-            # Format is typically like "(pos:1234..1236,aa:Met,seq:cat)"
-            if 'seq:' in anticodon_info:
-                seq_part = anticodon_info.split('seq:')[1].rstrip(')')
-                feat_obj['anti_codon'] = seq_part
-            if 'pos:' in anticodon_info:
-                pos_part = anticodon_info.split('pos:')[1].split(',')[0]
-                # Extract start position
-                if '..' in pos_part:
-                    pos = int(pos_part.split('..')[0])
-                    feat_obj['anti_codon_pos'] = pos
-    
+
+    try:
+        # tRNA-specific handling
+        if feature.type == 'tRNA':
+            if 'product' in qualifiers:
+                # Try to extract amino acid from product
+                product = qualifiers['product'][0]
+                if 'tRNA-' in product:
+                    aa = product.split('tRNA-')[1].split()[0]
+                    feat_obj['amino_acid'] = aa
+
+            # Extract anticodon information
+            if 'anticodon' in qualifiers:
+                anticodon_info = qualifiers['anticodon'][0]
+                # Format is typically like "(pos:1234..1236,aa:Met,seq:cat)"
+                if 'seq:' in anticodon_info:
+                    seq_part = anticodon_info.split('seq:')[1].rstrip(')')
+                    feat_obj['anti_codon'] = seq_part
+                if 'pos:' in anticodon_info:
+                    pos_part = anticodon_info.split('pos:')[1].split(',')[0]
+                    # Extract start position
+                    if '..' in pos_part:
+                        pos = int(pos_part.split('..')[0])
+                        feat_obj['anti_codon_pos'] = pos
+    except (IndexError, ValueError):
+        # Malformed tRNA product/anticodon qualifiers are ignored
+        logging.warning(f"Feature '{feature}' has a malformed tRNA or anti-codon product.")
+        pass
+
     # Optional fields that might be in qualifiers
     if 'label' in qualifiers:
         feat_obj['label'] = qualifiers['label'][0]
@@ -675,6 +708,7 @@ def main():
     parser.add_argument(
         '--gram',
         default=None,
+        choices=['+', '-'],
         help='Gram stain (+ or -)'
     )
     parser.add_argument(
