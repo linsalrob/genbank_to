@@ -10,7 +10,7 @@ import argparse
 import json
 from .genbank import genbank_to_faa, genbank_to_fna, genbank_to_orfs, genbank_to_ptt, genbank_to_functions
 from .genbank import genbank_to_gff, genbank_to_phage_finder, genbank_seqio, genbank_to_amrfinder
-from .genbank_to_json import genbank_to_json
+from .genbank_to_json import genbank_to_json, validate_translation_table
 from Bio import SeqIO
 import logging
 from .version import __version__
@@ -200,13 +200,7 @@ def run():
 
         # Validate translation table if provided
         if args.translation_table is not None:
-            # Valid NCBI translation table IDs (as of 2024, with some gaps)
-            valid_tables = {1, 2, 3, 4, 5, 6, 9, 10, 11, 12, 13, 14, 16, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 33}
-            if args.translation_table not in valid_tables:
-                print(
-                    f"Error: Invalid translation table {args.translation_table}. Valid tables: {sorted(valid_tables)}",
-                    file=sys.stderr)
-                sys.exit(1)
+            validate_translation_table(args.translation_table)
             genome_info['translation_table'] = args.translation_table
 
         bakta_json = genbank_to_json(args.genbank, genome_info)

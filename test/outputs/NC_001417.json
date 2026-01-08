@@ -176,7 +176,6 @@
         }
     ],
     "version": {
-        "bakta": "NA",
-        "db": "NA"
+        "genbank_to": "0.53"
     }
 }
