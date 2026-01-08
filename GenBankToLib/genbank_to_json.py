@@ -130,7 +130,7 @@ def calculate_n_ratio(sequences: List[str]) -> float:
     return n_count / total_count if total_count > 0 else 0.0
 
 
-def extract_genome_metadata(records: List[SeqRecord], genome_info: Dict[str, str]) -> Dict[str, Any]:
+def extract_genome_metadata(records: List[SeqRecord], genome_info: Dict[str, Any]) -> Dict[str, Any]:
     """
     Extract genome-level metadata from records and command-line arguments.
     
