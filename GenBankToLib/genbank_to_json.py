@@ -600,7 +600,7 @@ def validate_json_output(data: Dict[str, Any]) -> None:
             f"Feature {i} has contig '{feat['contig']}' not in sequences"
 
 
-def genbank_to_json(genbank_path: str, genome_info: Dict[str, str]) -> Dict[str, Any]:
+def genbank_to_json(genbank_path: str, genome_info: Dict[str, Any]) -> Dict[str, Any]:
     """
     Convert a GenBank file to JSON format.
     
