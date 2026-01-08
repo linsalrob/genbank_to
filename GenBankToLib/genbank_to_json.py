@@ -130,6 +130,25 @@ def calculate_n_ratio(sequences: List[str]) -> float:
     return n_count / total_count if total_count > 0 else 0.0
 
 
+def validate_translation_table(translation_table: int) -> None:
+    """
+    Validate that the translation table ID is a valid NCBI translation table.
+    
+    Args:
+        translation_table: The translation table ID to validate
+        
+    Raises:
+        SystemExit: If the translation table is invalid
+    """
+    # Valid NCBI translation table IDs (as of 2024, with some gaps)
+    valid_tables = {1, 2, 3, 4, 5, 6, 9, 10, 11, 12, 13, 14, 16, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 33}
+    if translation_table not in valid_tables:
+        print(
+            f"Error: Invalid translation table {translation_table}. Valid tables: {sorted(valid_tables)}",
+            file=sys.stderr)
+        sys.exit(1)
+
+
 def extract_genome_metadata(records: List[SeqRecord], genome_info: Dict[str, Any]) -> Dict[str, Any]:
     """
     Extract genome-level metadata from records and command-line arguments.
@@ -703,11 +722,7 @@ def main():
 
     # Validate translation table if provided
     if args.translation_table is not None:
-        # Valid NCBI translation table IDs (as of 2024, with some gaps)
-        valid_tables = {1, 2, 3, 4, 5, 6, 9, 10, 11, 12, 13, 14, 16, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 33}
-        if args.translation_table not in valid_tables:
-            print(f"Error: Invalid translation table {args.translation_table}. Valid tables: {sorted(valid_tables)}", file=sys.stderr)
-            sys.exit(1)
+        validate_translation_table(args.translation_table)
         genome_info['translation_table'] = args.translation_table
 
     try:
