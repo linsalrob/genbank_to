@@ -224,7 +224,7 @@ def genbank_to_ptt(gbkf, printout=False):
 
             thisres = [
                 f"{feat.location.start}..{feat.location.end}",
-                "+" if feat.strand >= 0 else "-",
+                "+" if feat.location.strand >= 0 else "-",
                 (len(feat.location) / 3) - 1,
                 gi,
                 gene,

@@ -1,7 +1,5 @@
-import pkg_resources
-# this comes from setuptools
-
 try:
-    __version__ = pkg_resources.get_distribution('genbank_to').version
+    from importlib.metadata import version
+    __version__ = version('genbank_to')
 except Exception:
     __version__ = 'unknown'
