@@ -55,11 +55,6 @@ These outputs are assuming you provide a (for example) genome file that contains
  - `--phage_finder` outputs a unique format required by [phage_finder](http://phage-finder.sourceforge.net/)
  - `--bakta-json` outputs JSON format genome files similar to those created by [Bakta](https://github.com/oschwengers/bakta).
     - This option also allows you to specify additional information which can be recorded in the JSON output, including:
-        - `--bakta-version` the version of bakta made to create the file (probably not applicable here)
-        - `--db-version` the database version used for the annotations
-        - `--genus` an alternate genus specification (overrides GenBank annotation)
-        - `--species` an alternate species specification (overrides GenBank annotation)
-        - `--strain` an alternate strain designation (overrides GenBank annotation)
         - `--gram` [should be `+` or `-`] whether the strain is Gram +ve or Gram -ve. Note that if not provided we compute some from [our list of Bacteria](https://github.com/linsalrob/genbank_to/blob/main/GenBankToLib/bacteria.py)
         - `--translation-table` if you dind't use 11
 

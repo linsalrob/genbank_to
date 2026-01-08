@@ -28,6 +28,7 @@ from Bio import SeqIO
 from Bio.Seq import Seq
 from Bio.SeqFeature import SeqFeature
 from Bio.SeqRecord import SeqRecord
+from .version import __version__
 
 try:
     from Bio.SeqUtils import molecular_weight
@@ -129,7 +130,7 @@ def calculate_n_ratio(sequences: List[str]) -> float:
     return n_count / total_count if total_count > 0 else 0.0
 
 
-def extract_genome_metadata(records: List[SeqRecord], args: argparse.Namespace) -> Dict[str, Any]:
+def extract_genome_metadata(records: List[SeqRecord], genome_info: Dict[str, Any]) -> Dict[str, Any]:
     """
     Extract genome-level metadata from records and command-line arguments.
     
@@ -137,7 +138,8 @@ def extract_genome_metadata(records: List[SeqRecord], args: argparse.Namespace) 
     
     Args:
         records: List of SeqRecord objects
-        args: Command-line arguments
+        genome_info: Optional information about the organism and genome
+                     currently we use translation_table and gram.
         
     Returns:
         Genome metadata dictionary
@@ -184,23 +186,17 @@ def extract_genome_metadata(records: List[SeqRecord], args: argparse.Namespace) 
                 break
         
         # Infer gram stain from genus if not provided
-        if genome['genus'] != "NA" and not args.gram:
+        if genome['genus'] != "NA" and not genome_info['gram']:
             if genome['genus'] in gram_positive:
                 genome['gram'] = '+'
             elif genome['genus'] in gram_negative:
                 genome['gram'] = '-'
     
     # Override with command-line arguments if provided
-    if args.genus:
-        genome['genus'] = args.genus
-    if args.species:
-        genome['species'] = args.species
-    if args.strain:
-        genome['strain'] = args.strain
-    if args.gram:
-        genome['gram'] = args.gram
-    if args.translation_table:
-        genome['translation_table'] = args.translation_table
+    if genome_info['gram'] is not None:
+        genome['gram'] = genome_info['gram']
+    if genome_info['translation_table'] is not None:
+        genome['translation_table'] = genome_info['translation_table']
     
     return genome
 
@@ -604,13 +600,14 @@ def validate_json_output(data: Dict[str, Any]) -> None:
             f"Feature {i} has contig '{feat['contig']}' not in sequences"
 
 
-def genbank_to_json(genbank_path: str, args: argparse.Namespace) -> Dict[str, Any]:
+def genbank_to_json(genbank_path: str, genome_info: Dict[str, Any]) -> Dict[str, Any]:
     """
     Convert a GenBank file to JSON format.
     
     Args:
         genbank_path: Path to GenBank file
-        args: Command-line arguments
+        genome_info: Optional information about the organism and genome
+             currently we use translation_table and gram.
         
     Returns:
         Complete JSON data structure
@@ -622,7 +619,7 @@ def genbank_to_json(genbank_path: str, args: argparse.Namespace) -> Dict[str, An
         raise ValueError(f"No records found in {genbank_path}")
     
     # Extract genome metadata
-    genome = extract_genome_metadata(records, args)
+    genome = extract_genome_metadata(records, genome_info)
     
     # Extract sequences
     sequences = [create_sequence_object(record) for record in records]
@@ -643,8 +640,7 @@ def genbank_to_json(genbank_path: str, args: argparse.Namespace) -> Dict[str, An
     
     # Version information
     version = {
-        "bakta": args.bakta_version if args.bakta_version else "NA",
-        "db": args.db_version if args.db_version else "NA"
+        "genbank_to": __version__
     }
     
     # Assemble final JSON structure
@@ -684,33 +680,6 @@ def main():
     
     # Optional version arguments
     parser.add_argument(
-        '--bakta-version',
-        default=None,
-        help='Bakta version string (default: NA)'
-    )
-    parser.add_argument(
-        '--db-version',
-        default=None,
-        help='Database version string (default: NA)'
-    )
-    
-    # Optional genome metadata arguments
-    parser.add_argument(
-        '--genus',
-        default=None,
-        help='Genus name (overrides GenBank annotation)'
-    )
-    parser.add_argument(
-        '--species',
-        default=None,
-        help='Species name (overrides GenBank annotation)'
-    )
-    parser.add_argument(
-        '--strain',
-        default=None,
-        help='Strain name (overrides GenBank annotation)'
-    )
-    parser.add_argument(
         '--gram',
         default=None,
         choices=['+', '-'],
@@ -724,7 +693,14 @@ def main():
     )
     
     args = parser.parse_args()
-    
+
+    genome_info = {
+        'gram': None,
+        'translation_table': 11,
+    }
+    if args.gram is not None:
+        genome_info['gram'] = args.gram
+
     # Validate translation table if provided
     if args.translation_table is not None:
         # Valid NCBI translation table IDs (as of 2024, with some gaps)
@@ -732,10 +708,11 @@ def main():
         if args.translation_table not in valid_tables:
             print(f"Error: Invalid translation table {args.translation_table}. Valid tables: {sorted(valid_tables)}", file=sys.stderr)
             sys.exit(1)
-    
+        genome_info['translation_table'] = args.translation_table
+
     try:
         # Convert GenBank to JSON
-        json_data = genbank_to_json(args.genbank, args)
+        json_data = genbank_to_json(args.genbank, genome_info)
         
         # Write JSON output
         with open(args.out, 'w') as f:

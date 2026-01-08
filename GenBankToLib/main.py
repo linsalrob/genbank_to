@@ -44,22 +44,10 @@ def run():
     parser.add_argument('--bakta-json', help="Output BAKTA json format")
     bakta_group = parser.add_argument_group("BAKTA JSON metadata (requires --bakta-json)")
     # JSON-only arguments (Bakta metadata)
-    bakta_group.add_argument('--bakta-version', default=None,
-                        help='Bakta version string (default: NA) [requires --bakta-json]')
-    bakta_group.add_argument('--db-version', default=None,
-                        help='Database version string (default: NA) [requires --bakta-json]')
-
-    bakta_group.add_argument('--genus', default=None,
-                        help='Genus name (overrides GenBank annotation) [requires --bakta-json]')
-    bakta_group.add_argument('--species', default=None,
-                        help='Species name (overrides GenBank annotation) [requires --bakta-json]')
-    bakta_group.add_argument('--strain', default=None,
-                        help='Strain name (overrides GenBank annotation) [requires --bakta-json]')
     bakta_group.add_argument('--gram', default=None, choices=['+', '-'],
                         help='Gram stain (+ or -) [requires --bakta-json]')
     bakta_group.add_argument('--translation-table', type=int, default=None,
                         help='NCBI translation table number (default: 11) [requires --bakta-json]')
-
 
     parser.add_argument('--pseudo', help='include pseudo genes in the output. (This may cause biopython errors).',
                         action='store_true')
@@ -80,7 +68,7 @@ def run():
         sys.stderr.write("-i was provided, so requiring to separate files (--separate assumed)\n")
         args.separate = True
 
-    json_only_fields = ['bakta_version', 'db_version', 'genus', 'species', 'strain', 'gram', 'translation_table']
+    json_only_fields = ['gram', 'translation_table']
 
     json_enabled = bool(args.bakta_json is not None)
 
@@ -203,7 +191,25 @@ def run():
         did = True
 
     if args.bakta_json:
-        bakta_json = genbank_to_json(args.genbank, args)
+        genome_info = {
+            'gram': None,
+            'translation_table': 11,
+        }
+        if args.gram is not None:
+            genome_info['gram'] = args.gram
+
+        # Validate translation table if provided
+        if args.translation_table is not None:
+            # Valid NCBI translation table IDs (as of 2024, with some gaps)
+            valid_tables = {1, 2, 3, 4, 5, 6, 9, 10, 11, 12, 13, 14, 16, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 33}
+            if args.translation_table not in valid_tables:
+                print(
+                    f"Error: Invalid translation table {args.translation_table}. Valid tables: {sorted(valid_tables)}",
+                    file=sys.stderr)
+                sys.exit(1)
+            genome_info['translation_table'] = args.translation_table
+
+        bakta_json = genbank_to_json(args.genbank, genome_info)
         with open(args.bakta_json, 'w') as out:
             logging.info(f"Writing bakta_json to {args.bakta_json}")
             json.dump(bakta_json, out, indent=4)
