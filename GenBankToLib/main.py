@@ -7,8 +7,10 @@ import os
 import sys
 import gzip
 import argparse
+import json
 from .genbank import genbank_to_faa, genbank_to_fna, genbank_to_orfs, genbank_to_ptt, genbank_to_functions
 from .genbank import genbank_to_gff, genbank_to_phage_finder, genbank_seqio, genbank_to_amrfinder
+from .genbank_to_json import genbank_to_json
 from Bio import SeqIO
 import logging
 from .version import __version__
@@ -38,6 +40,27 @@ def run():
     parser.add_argument('--gff3', help="Output gff3 format")
     parser.add_argument('--amr', help="Output NCBI AMRFinderPlus format (creates a gff file and an faa file)")
     parser.add_argument('--phage_finder', help='make a phage finder file')
+
+    parser.add_argument('--bakta-json', help="Output BAKTA json format")
+    bakta_group = parser.add_argument_group("BAKTA JSON metadata (requires --bakta-json)")
+    # JSON-only arguments (Bakta metadata)
+    bakta_group.add_argument('--bakta-version', default=None,
+                        help='Bakta version string (default: NA) [requires --json]')
+    bakta_group.add_argument('--db-version', default=None,
+                        help='Database version string (default: NA) [requires --json]')
+
+    bakta_group.add_argument('--genus', default=None,
+                        help='Genus name (overrides GenBank annotation) [requires --json]')
+    bakta_group.add_argument('--species', default=None,
+                        help='Species name (overrides GenBank annotation) [requires --json]')
+    bakta_group.add_argument('--strain', default=None,
+                        help='Strain name (overrides GenBank annotation) [requires --json]')
+    bakta_group.add_argument('--gram', default=None, choices=['+', '-'],
+                        help='Gram stain (+ or -) [requires --json]')
+    bakta_group.add_argument('--translation-table', type=int, default=None,
+                        help='NCBI translation table number (default: 11) [requires --json]')
+
+
     parser.add_argument('--pseudo', help='include pseudo genes in the output. (This may cause biopython errors).',
                         action='store_true')
     parser.add_argument('--separate', action='store_true',
@@ -56,6 +79,17 @@ def run():
     if args.seqid and not args.separate:
         sys.stderr.write("-i was provided, so requiring to separate files (--separate assumed)\n")
         args.separate = True
+
+    json_only_fields = ['bakta_version', 'db_version', 'genus', 'species', 'strain', 'gram', 'translation_table']
+
+    json_enabled = bool(args.bakta_json is not None)
+
+    if not json_enabled:
+        used = [f'--{name.replace("_", "-")}' for name in json_only_fields
+                if getattr(args, name) is not None]
+        if used:
+            parser.error(f"{', '.join(used)} require --bakta-json")
+            sys.exit(1)
 
     loglevel = logging.INFO
     if args.debug:
@@ -167,6 +201,13 @@ def run():
 
     if args.gff3:
         genbank_to_gff(args.genbank, args.gff3)
+        did = True
+
+    if args.bakta_json:
+        bakta_json = genbank_to_json(args.genbank, args)
+        with open(args.bakta_json, 'w') as out:
+            logging.info(f"Writing bakta_json to {args.bakta_json}")
+            json.dump(bakta_json, out, indent=4)
         did = True
 
     if args.amr:
