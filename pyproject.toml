@@ -34,6 +34,11 @@ dependencies = [
     "bcbio-gff>=0.6.6",
 ]
 
+[project.optional-dependencies]
+test = [
+    "pytest>=7.0",
+]
+
 [project.urls]
 Homepage = "https://github.com/linsalrob/genbank_to"
 Repository = "https://github.com/linsalrob/genbank_to"
