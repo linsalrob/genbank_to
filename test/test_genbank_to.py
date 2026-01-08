@@ -5,9 +5,7 @@ This test suite runs genbank_to commands and verifies that the outputs
 match the expected reference files in test/outputs/.
 """
 
-import os
 import subprocess
-import tempfile
 import filecmp
 from pathlib import Path
 
@@ -42,21 +40,32 @@ class TestGenbankTo:
 
     def compare_files(self, expected_file, actual_file):
         """Compare two files and assert they are identical."""
-        assert os.path.exists(expected_file), f"Expected file not found: {expected_file}"
-        assert os.path.exists(actual_file), f"Actual file not found: {actual_file}"
+        assert expected_file.exists(), f"Expected file not found: {expected_file}"
+        assert actual_file.exists(), f"Actual file not found: {actual_file}"
         
         # Use filecmp for binary comparison
         if not filecmp.cmp(expected_file, actual_file, shallow=False):
             # If files differ, show the difference
-            with open(expected_file, 'r') as f1, open(actual_file, 'r') as f2:
+            with open(expected_file, 'rb') as f1, open(actual_file, 'rb') as f2:
                 expected_content = f1.read()
                 actual_content = f2.read()
+            # Convert to string for display, handling potential encoding issues
+            try:
+                expected_str = expected_content.decode('utf-8')
+                actual_str = actual_content.decode('utf-8')
+                preview_len = 1000
+            except UnicodeDecodeError:
+                # For binary files, show hex representation
+                expected_str = expected_content.hex()
+                actual_str = actual_content.hex()
+                preview_len = 500
+            
             pytest.fail(
                 f"Files differ:\n"
                 f"Expected: {expected_file}\n"
                 f"Actual: {actual_file}\n"
-                f"Expected content:\n{expected_content[:500]}\n...\n"
-                f"Actual content:\n{actual_content[:500]}\n..."
+                f"Expected content:\n{expected_str[:preview_len]}\n...\n"
+                f"Actual content:\n{actual_str[:preview_len]}\n..."
             )
 
     def test_ptt_conversion(self, tmp_path):
