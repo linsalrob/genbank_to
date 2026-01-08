@@ -510,6 +510,11 @@ def calculate_coding_ratio_accurate(records: List[SeqRecord]) -> float:
     This method creates a mask for each base and marks it as coding if it's
     part of any CDS feature, providing a more accurate coding density measure.
     
+    Note: For very large genomes (e.g., >1Gbp), this method allocates a boolean
+    array equal to the sequence length, which could consume significant memory
+    (~400MB for a 3Gbp genome). For such cases, consider using interval-based
+    approaches or numpy arrays for better memory efficiency.
+    
     Args:
         records: List of SeqRecord objects
         
@@ -715,10 +720,18 @@ def main():
         '--translation-table',
         type=int,
         default=None,
-        help='NCBI translation table number (default: 11)'
+        help='NCBI translation table number (default: 11, valid range: 1-33)'
     )
     
     args = parser.parse_args()
+    
+    # Validate translation table if provided
+    if args.translation_table is not None:
+        # Valid NCBI translation table IDs (as of 2024, with some gaps)
+        valid_tables = {1, 2, 3, 4, 5, 6, 9, 10, 11, 12, 13, 14, 16, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 33}
+        if args.translation_table not in valid_tables:
+            print(f"Error: Invalid translation table {args.translation_table}. Valid tables: {sorted(valid_tables)}", file=sys.stderr)
+            sys.exit(1)
     
     try:
         # Convert GenBank to JSON
