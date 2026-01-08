@@ -46,6 +46,15 @@ These outputs are assuming you provide a (for example) genome file that contains
  - `--gff3` outputs GFF3 format
  - `--amr`  outputs a GFF file, an amino acid fasta file, and a nucleotide fasta file as required by [AMR Finder Plus](https://github.com/ncbi/amr/wiki/Running-AMRFinderPlus#examples). Note that this format checks for validity that often crashes AMRFinderPlus
  - `--phage_finder` outputs a unique format required by [phage_finder](http://phage-finder.sourceforge.net/)
+ - `--bakta-json` outputs JSON format genome files similar to those created by [Bakta](https://github.com/oschwengers/bakta).
+    - This option also allows you to specify additional information which can be recorded in the JSON output, including:
+        - `--bakta-version` the version of bakta made to create the file (probably not applicable here)
+        - `--db-version` the database version used for the annotations
+        - `--genus` an alternate genus specification (overrides GenBank annotation)
+        - `--species` an alternate species specification (overrides GenBank annotation)
+        - `--strain` an alternate strain designation (overrides GenBank annotation)
+        - `--gram` [should be `+` or `-`] whether the strain is Gram +ve or Gram -ve. Note that if not provided we compute some from [our list of Bacteria](https://github.com/linsalrob/genbank_to/blob/main/GenBankToLib/bacteria.py)
+        - `--translation-table` if you dind't use 11
 
 ## Output options
 
@@ -83,10 +92,16 @@ genbank_to -g test/NC_001417.gbk -o test/NC_001417.orfs
 genbank_to -g test/NC_001417.gbk -a test/NC_001417.faa
 ```
 
-4. Do all of these at once
+4. Extract Bakta format JSON
 
 ```bash
-genbank_to -g test/NC_001417.gbk -n test/NC_001417.fna -o test/NC_001417.orfs -a test/NC_001417.faa
+genbank_to -g test/NC_001417.gbk --bakta-json test/NC_001417.json
+```
+
+5. Do all of these at once
+
+```bash
+genbank_to -g test/NC_001417.gbk -n test/NC_001417.fna -o test/NC_001417.orfs -a test/NC_001417.faa --bakta-json test/NC_001417.json
 ```
 
 # Installation
