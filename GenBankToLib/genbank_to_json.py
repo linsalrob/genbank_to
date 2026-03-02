@@ -332,8 +332,25 @@ def create_feature_object(feature: SeqFeature, record: SeqRecord,
     """
     # Only process relevant feature types
     relevant_types = ['CDS', 'tRNA', 'rRNA', 'tmRNA', 'ncRNA']
+    ftype = feature.type 
     if feature.type not in relevant_types:
         return None
+    if feature.type == 'CDS':
+        ftype = 'cds'
+
+
+
+    
+    # bakta specifically codes many different types as constants (many more than these 5)
+    # relevantly, bakta makes CDS lower case - which breaks baktfold v0.1.0 parsing as it is
+    # which I could handle in baktfold but i think it is better to keep this function as consistent with bakta's output as possible
+
+    # FEATURE_T_RNA = 'tRNA'
+    # FEATURE_TM_RNA = 'tmRNA'
+    # FEATURE_R_RNA = 'rRNA'
+    # FEATURE_NC_RNA = 'ncRNA'
+    # FEATURE_CDS = 'cds'
+
     
     qualifiers = feature.qualifiers
     
@@ -349,7 +366,7 @@ def create_feature_object(feature: SeqFeature, record: SeqRecord,
     # Coordinates: BioPython uses 0-based half-open intervals [start, end)
     # We convert to 1-based inclusive: start+1, end (end is already correct)
     feat_obj = {
-        "type": feature.type,
+        "type": ftype,
         "contig": record.id,
         "start": int(feature.location.start) + 1,  # Convert to 1-based
         "stop": int(feature.location.end),  # Already correct for 1-based inclusive
