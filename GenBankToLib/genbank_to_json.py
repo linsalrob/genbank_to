@@ -530,6 +530,17 @@ def create_feature_object(feature: SeqFeature, record: SeqRecord,
         logging.warning(f"Feature '{feature}' has a malformed tRNA or anti-codon product.")
         pass
 
+    try:
+        # tRNA-specific handling
+        if feature.type == "ncRNA":
+            if 'ncRNA_class' in qualifiers:
+                feat_obj['class'] = qualifiers['ncRNA_class'][0]
+    except (IndexError, ValueError):
+        # Malformed ncRNA class qualifiers are ignored
+        logging.warning(f"Feature '{feature}' has a malformed ncRNA class.")
+        pass
+
+
     # Optional fields that might be in qualifiers
     if 'label' in qualifiers:
         feat_obj['label'] = qualifiers['label'][0]
