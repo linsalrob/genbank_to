@@ -513,14 +513,33 @@ def create_feature_object(feature: SeqFeature, record: SeqRecord,
                     feat_obj['anti_codon'] = seq_part
                 if 'pos:' in anticodon_info:
                     pos_part = anticodon_info.split('pos:')[1].split(',')[0]
-                    # Extract start position
+
+                    # Extract start and end positions - bakta format has both
                     if '..' in pos_part:
-                        pos = int(pos_part.split('..')[0])
-                        feat_obj['anti_codon_pos'] = pos
+                        start_str, end_str = pos_part.split('..')
+                        start = int(start_str)
+                        end = int(end_str)
+                        feat_obj['anti_codon_pos'] = [start, end]
+                    else:
+                        # fallback if only one position is provided
+                        pos = int(pos_part)
+                        feat_obj['anti_codon_pos'] = [pos]
+
     except (IndexError, ValueError):
         # Malformed tRNA product/anticodon qualifiers are ignored
         logging.warning(f"Feature '{feature}' has a malformed tRNA or anti-codon product.")
         pass
+
+    try:
+        # tRNA-specific handling
+        if feature.type == "ncRNA":
+            if 'ncRNA_class' in qualifiers:
+                feat_obj['class'] = qualifiers['ncRNA_class'][0]
+    except (IndexError, ValueError):
+        # Malformed ncRNA class qualifiers are ignored
+        logging.warning(f"Feature '{feature}' has a malformed ncRNA class.")
+        pass
+
 
     # Optional fields that might be in qualifiers
     if 'label' in qualifiers:
