@@ -17,7 +17,7 @@
     },
     "features": [
         {
-            "type": "CDS",
+            "type": "cds",
             "contig": "NC_001417.2",
             "start": 130,
             "stop": 1311,
@@ -44,7 +44,7 @@
             "rbs_motif": "NA"
         },
         {
-            "type": "CDS",
+            "type": "cds",
             "contig": "NC_001417.2",
             "start": 1335,
             "stop": 1727,
@@ -107,7 +107,7 @@
             "rbs_motif": "NA"
         },
         {
-            "type": "CDS",
+            "type": "cds",
             "contig": "NC_001417.2",
             "start": 1678,
             "stop": 1905,
@@ -134,7 +134,7 @@
             "rbs_motif": "NA"
         },
         {
-            "type": "CDS",
+            "type": "cds",
             "contig": "NC_001417.2",
             "start": 1761,
             "stop": 3398,
@@ -176,6 +176,6 @@
         }
     ],
     "version": {
-        "genbank_to": "0.53"
+        "genbank_to": "0.55"
     }
 }

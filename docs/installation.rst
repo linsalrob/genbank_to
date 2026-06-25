@@ -73,7 +73,8 @@ genbank_to requires Python 3.9 or later and the following packages:
 - **biopython** (>=1.74): For parsing GenBank files
 - **numpy** (>=1.16.0): For numerical operations
 - **pandas**: For data manipulation
-- **bcbio-gff** (>=0.6.6): For GFF format support
+
+GFF and GFF3 reading/writing support is included in genbank_to.
 
 These dependencies will be automatically installed when you install genbank_to using any of the methods above.
 
