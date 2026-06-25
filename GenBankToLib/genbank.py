@@ -8,10 +8,11 @@ import re
 import binascii
 import gzip
 from Bio import SeqIO
-from BCBio import GFF  # bcbio-gff package
 import pandas as pd
 from io import StringIO
 import logging
+
+from .gff import write_gff3
 
 __author__ = 'Rob Edwards'
 __copyright__ = 'Copyright 2020, Rob Edwards'
@@ -223,7 +224,7 @@ def genbank_to_ptt(gbkf, printout=False):
             cid = feature_id(seq, feat)
 
             thisres = [
-                f"{feat.location.start}..{feat.location.end}",
+                f"{int(feat.location.start) + 1}..{int(feat.location.end)}",
                 "+" if feat.location.strand >= 0 else "-",
                 (len(feat.location) / 3) - 1,
                 gi,
@@ -366,7 +367,7 @@ def genbank_to_gff(gbkf, out_gff):
     logging.info(f"Writing gff3 to {out_gff}")
     with open(out_gff, 'w') as outf:
         seqs, handle = genbank_seqio(gbkf)
-        GFF.write(seqs, outf, True)
+        write_gff3(seqs, outf, True)
         handle.close()
 
 
@@ -380,7 +381,7 @@ def genbank_to_amrfinder(gbkf, amrout):
     logging.info(f"AMR: Converting {gbkf} to GFF3")
     gffstr = StringIO()
     seqs, handle = genbank_seqio(gbkf)
-    GFF.write(seqs, gffstr, True)
+    write_gff3(seqs, gffstr, True)
     handle.close()
     gffstr.seek(0)
 
