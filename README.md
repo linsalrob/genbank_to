@@ -7,10 +7,16 @@
 [![PyPi](https://img.shields.io/pypi/pyversions/genbank_to.svg?style=flat-square&label=PyPi%20Versions)](https://pypi.org/project/genbank_to/)
 [![Documentation Status](https://readthedocs.org/projects/genbank-to/badge/?version=latest)](https://genbank-to.readthedocs.io/en/latest/?badge=latest)
 
-A straightforward application to convert NCBI GenBank format files to a swath of other formats. Hopefully we have the 
+A straightforward application to convert NCBI GenBank format files to a swath of other formats. Hopefully we have the
 format you need, but if not either post [an issue](https://github.com/linsalrob/genbank_to/issues) using our template,
 or if you have already got it working, post [a PR](https://github.com/linsalrob/genbank_to/pulls) so we can add it and
 add you to the project.
+
+## Browser application
+
+The static browser converter is available at **https://linsalrob.github.io/genbank_to/**.
+It reads and converts GenBank files entirely in the browser, so sequence data never
+leaves the user's computer.
 
 You might also be interested [deprekate's](https://github.com/deprekate/) package called [genbank](https://github.com/deprekate/genbank) which includes
 several of the features here, and you can `import genbank` into your Python projects.
