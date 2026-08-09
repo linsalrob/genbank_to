@@ -129,3 +129,47 @@ def test_write_gff3_splits_origin_spanning_compound_locations():
         (900, 1000, "1"),
         (1, 100, "2"),
     ]
+
+
+def test_write_gff3_uses_protein_id_for_compound_feature_id():
+    seq_record = SeqRecord(Seq("N" * 30), id="seq1")
+    seq_record.features = [
+        SeqFeature(
+            CompoundLocation(
+                [SimpleLocation(0, 9, strand=1), SimpleLocation(20, 30, strand=1)]
+            ),
+            type="CDS",
+            qualifiers={"protein_id": ["protein1"]},
+        )
+    ]
+    handle = StringIO()
+
+    write_gff3([seq_record], handle, include_fasta=False)
+
+    records = list(parse_gff3(StringIO(handle.getvalue())))
+    assert [record.attributes["ID"] for record in records] == [
+        ["protein1"],
+        ["protein1"],
+    ]
+    assert "ID" not in seq_record.features[0].qualifiers
+
+
+def test_write_gff3_synthesizes_compound_feature_id():
+    seq_record = SeqRecord(Seq("N" * 30), id="seq1")
+    seq_record.features = [
+        SeqFeature(SimpleLocation(10, 15), type="gene"),
+        SeqFeature(
+            CompoundLocation([SimpleLocation(0, 5), SimpleLocation(25, 30)]),
+            type="misc_feature",
+        ),
+    ]
+    handle = StringIO()
+
+    write_gff3([seq_record], handle, include_fasta=False)
+
+    records = list(parse_gff3(StringIO(handle.getvalue())))
+    assert "ID" not in records[0].attributes
+    assert [record.attributes["ID"] for record in records[1:]] == [
+        ["seq1:misc_feature:2"],
+        ["seq1:misc_feature:2"],
+    ]

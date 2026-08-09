@@ -130,8 +130,8 @@ def write_gff3(seq_records: Iterable[object], handle: TextIO, include_fasta: boo
                 attributes=annotation_attributes,
             )
             handle.write(_format_record(annotation_record, gff3=True))
-        for feature in seq_record.features:
-            handle.write(_format_feature(seq_record, feature))
+        for feature_index, feature in enumerate(seq_record.features, start=1):
+            handle.write(_format_feature(seq_record, feature, feature_index))
 
     if include_fasta and records:
         handle.write("##FASTA\n")
@@ -159,11 +159,13 @@ def _format_record(record: GFFRecord, gff3: bool = True) -> str:
     ) + "\n"
 
 
-def _format_feature(seq_record: object, feature: object) -> str:
+def _format_feature(seq_record: object, feature: object, feature_index: int) -> str:
     records = []
     initial_cds_phase = _initial_cds_phase(feature)
     cds_bases = 0
-    for part_index, part in enumerate(_location_parts(feature.location)):
+    parts = list(_location_parts(feature.location))
+    attributes = _feature_attributes(seq_record, feature, feature_index, len(parts))
+    for part_index, part in enumerate(parts):
         start = int(part.start) + 1
         end = int(part.end)
         strand = _strand(part)
@@ -183,7 +185,7 @@ def _format_feature(seq_record: object, feature: object) -> str:
             end=end,
             strand=strand,
             phase=phase,
-            attributes=feature.qualifiers,
+            attributes=attributes,
         )
         records.append(_format_record(record, gff3=True))
     return "".join(records)
@@ -191,6 +193,23 @@ def _format_feature(seq_record: object, feature: object) -> str:
 
 def _location_parts(location: object) -> Iterable[object]:
     return getattr(location, "parts", [location])
+
+
+def _feature_attributes(
+    seq_record: object, feature: object, feature_index: int, part_count: int
+) -> dict[str, list[object]]:
+    attributes = dict(feature.qualifiers)
+    if part_count <= 1 or "ID" in attributes:
+        return attributes
+
+    for qualifier in ("protein_id", "locus_tag"):
+        values = attributes.get(qualifier)
+        if values:
+            attributes["ID"] = [values[0]]
+            return attributes
+
+    attributes["ID"] = [f"{seq_record.id}:{feature.type}:{feature_index}"]
+    return attributes
 
 
 def _initial_cds_phase(feature: object) -> int:
