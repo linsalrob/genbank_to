@@ -1,4 +1,10 @@
 const COMPLEMENT = { A: "T", T: "A", G: "C", C: "G", U: "A", R: "Y", Y: "R", S: "S", W: "W", K: "M", M: "K", B: "V", V: "B", D: "H", H: "D", N: "N" };
+const STANDARD_CODE = { TTT:"F",TTC:"F",TTA:"L",TTG:"L",TCT:"S",TCC:"S",TCA:"S",TCG:"S",TAT:"Y",TAC:"Y",TAA:"*",TAG:"*",TGT:"C",TGC:"C",TGA:"*",TGG:"W",CTT:"L",CTC:"L",CTA:"L",CTG:"L",CCT:"P",CCC:"P",CCA:"P",CCG:"P",CAT:"H",CAC:"H",CAA:"Q",CAG:"Q",CGT:"R",CGC:"R",CGA:"R",CGG:"R",ATT:"I",ATC:"I",ATA:"I",ATG:"M",ACT:"T",ACC:"T",ACA:"T",ACG:"T",AAT:"N",AAC:"N",AAA:"K",AAG:"K",AGT:"S",AGC:"S",AGA:"R",AGG:"R",GTT:"V",GTC:"V",GTA:"V",GTG:"V",GCT:"A",GCC:"A",GCA:"A",GCG:"A",GAT:"D",GAC:"D",GAA:"E",GAG:"E",GGT:"G",GGC:"G",GGA:"G",GGG:"G" };
+const GENETIC_CODES = {
+  1: { overrides: {}, starts: ["ATG", "CTG", "TTG"] },
+  4: { overrides: { TGA: "W" }, starts: ["TTA", "TTG", "CTG", "ATT", "ATC", "ATA", "ATG"] },
+  11: { overrides: {}, starts: ["TTG", "CTG", "ATT", "ATC", "ATA", "ATG", "GTG"] },
+};
 
 export const FORMATS = [
   { id: "fna", name: "Genome sequence", extension: ".fna", description: "Complete nucleotide records in FASTA format" },
@@ -89,6 +95,9 @@ export function parseLocation(location) {
   const parts = splitTopLevel(joined).map(part => {
     const partReverse = part.startsWith("complement(");
     const range = unwrap(part, "complement") ?? part;
+    if (range.includes(":")) {
+      throw new Error(`Remote feature locations are not supported: ${location}`);
+    }
     const numbers = [...range.matchAll(/\d+/g)].map(match => Number(match[0]));
     if (!numbers.length) throw new Error(`Unsupported feature location: ${location}`);
     return { start: numbers[0], end: numbers.at(-1), reverse: reverse !== partReverse };
@@ -133,7 +142,7 @@ function orfFasta(records) {
 
 function proteinFasta(records) {
   return codingFeatures(records).map(({ record, feature, index }) => {
-    const translation = first(feature, "translation") || translate(featureSequence(record, feature), Number(first(feature, "codon_start") || 1) - 1);
+    const translation = featureProtein(record, feature);
     return fasta(featureId(feature, index), translation.replace(/\*$/, ""), first(feature, "product"));
   }).join("");
 }
@@ -165,12 +174,12 @@ function gff3(records) {
 function ptt(records) {
   const rows = [];
   for (const record of records) {
-    const cds = record.features.filter(feature => feature.type === "CDS");
+    const cds = record.features.filter(feature => feature.type === "CDS" && !isPseudo(feature));
     rows.push(`${record.definition || record.id} - 1..${record.sequence.length}`, `${cds.length} proteins`, "Location\tStrand\tLength\tPID\tGene\tSynonym\tCode\tCOG\tProduct");
     cds.forEach((feature, index) => {
       const start = Math.min(...feature.parts.map(part => part.start));
       const end = Math.max(...feature.parts.map(part => part.end));
-      const aaLength = Math.floor(featureSequence(record, feature).length / 3);
+      const aaLength = featureProtein(record, feature).replace(/\*$/, "").length;
       rows.push([`${start}..${end}`, feature.parts[0]?.reverse ? "-" : "+", aaLength, featureId(feature, index + 1), first(feature, "gene") || "-", first(feature, "locus_tag") || "-", "-", "-", first(feature, "product") || "-"].join("\t"));
     });
   }
@@ -179,8 +188,20 @@ function ptt(records) {
 
 function codingFeatures(records) {
   const result = [];
-  for (const record of records) record.features.filter(feature => feature.type === "CDS").forEach((feature, index) => result.push({ record, feature, index: index + 1 }));
+  for (const record of records) record.features.filter(feature => feature.type === "CDS" && !isPseudo(feature)).forEach((feature, index) => result.push({ record, feature, index: index + 1 }));
   return result;
+}
+
+function isPseudo(feature) {
+  return "pseudo" in feature.qualifiers || "pseudogene" in feature.qualifiers;
+}
+
+function featureProtein(record, feature) {
+  const annotated = first(feature, "translation");
+  if (annotated) return annotated;
+  const offset = Number(first(feature, "codon_start") || 1) - 1;
+  const geneticCode = Number(first(feature, "transl_table") || 1);
+  return translate(featureSequence(record, feature), offset, geneticCode);
 }
 
 function featureSequence(record, feature) {
@@ -206,10 +227,17 @@ function fasta(id, sequence, description = "") {
   return `${header}\n${wrapped}\n`;
 }
 
-function translate(sequence, offset) {
-  const table = { TTT:"F",TTC:"F",TTA:"L",TTG:"L",TCT:"S",TCC:"S",TCA:"S",TCG:"S",TAT:"Y",TAC:"Y",TAA:"*",TAG:"*",TGT:"C",TGC:"C",TGA:"*",TGG:"W",CTT:"L",CTC:"L",CTA:"L",CTG:"L",CCT:"P",CCC:"P",CCA:"P",CCG:"P",CAT:"H",CAC:"H",CAA:"Q",CAG:"Q",CGT:"R",CGC:"R",CGA:"R",CGG:"R",ATT:"I",ATC:"I",ATA:"I",ATG:"M",ACT:"T",ACC:"T",ACA:"T",ACG:"T",AAT:"N",AAC:"N",AAA:"K",AAG:"K",AGT:"S",AGC:"S",AGA:"R",AGG:"R",GTT:"V",GTC:"V",GTA:"V",GTG:"V",GCT:"A",GCC:"A",GCA:"A",GCG:"A",GAT:"D",GAC:"D",GAA:"E",GAG:"E",GGT:"G",GGC:"G",GGA:"G",GGG:"G" };
+function translate(sequence, offset, geneticCodeId) {
+  const geneticCode = GENETIC_CODES[geneticCodeId];
+  if (!geneticCode) {
+    throw new Error(`Cannot synthesize a protein with unsupported translation table ${geneticCodeId}.`);
+  }
   let protein = "";
-  for (let index = offset; index + 2 < sequence.length; index += 3) protein += table[sequence.slice(index, index + 3)] || "X";
+  for (let index = offset; index + 2 < sequence.length; index += 3) {
+    const codon = sequence.slice(index, index + 3);
+    const isAlternativeStart = offset === 0 && index === 0 && geneticCode.starts.includes(codon);
+    protein += isAlternativeStart ? "M" : geneticCode.overrides[codon] || STANDARD_CODE[codon] || "X";
+  }
   return protein;
 }
 
