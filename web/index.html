@@ -10,22 +10,25 @@
   <body>
     <header class="site-header">
       <a class="brand" href="./" aria-label="genbank_to home">
-        <span class="brand-mark" aria-hidden="true">g→</span>
+        <span class="brand-mark" aria-hidden="true">G</span>
         <span>genbank_to</span>
       </a>
-      <a class="github-link" href="https://github.com/linsalrob/genbank_to">View source</a>
+      <nav aria-label="Site links">
+        <span class="privacy-pill"><span aria-hidden="true">●</span> Runs locally</span>
+        <a class="github-link" href="https://github.com/linsalrob/genbank_to">GitHub</a>
+      </nav>
     </header>
 
     <main>
       <section class="hero">
-        <p class="eyebrow">GenBank conversion, without the upload</p>
-        <h1>Your sequence data stays <em>yours.</em></h1>
-        <p class="intro">Turn GenBank records into the formats you need. Everything runs locally in this browser tab—your file never leaves your computer.</p>
+        <p class="eyebrow">Browser-based sequence conversion</p>
+        <h1>Convert GenBank files locally</h1>
+        <p class="intro">Create common sequence and annotation formats directly in your browser. Your data is never uploaded or stored.</p>
       </section>
 
       <section class="workspace" aria-labelledby="converter-title">
         <div class="step-heading">
-          <span>01</span>
+          <span>1</span>
           <div>
             <h2 id="converter-title">Choose a GenBank file</h2>
             <p>Drop a <code>.gb</code>, <code>.gbk</code>, <code>.gbff</code>, or <code>.genbank</code> file here.</p>
@@ -34,7 +37,7 @@
 
         <input id="file-input" type="file" accept=".gb,.gbk,.gbff,.genbank,text/plain" hidden>
         <button id="drop-zone" class="drop-zone" type="button">
-          <span class="drop-icon" aria-hidden="true">↓</span>
+          <span class="drop-icon" aria-hidden="true">＋</span>
           <strong>Drop your file here</strong>
           <span>or click to browse</span>
         </button>
@@ -52,7 +55,7 @@
 
         <fieldset id="format-fieldset" disabled>
           <legend class="step-heading">
-            <span>02</span>
+            <span>2</span>
             <div>
               <h2>Choose your outputs</h2>
               <p>Select one or several formats to generate.</p>
@@ -62,14 +65,14 @@
         </fieldset>
 
         <button id="convert-button" class="convert-button" type="button" disabled>
-          Generate selected files <span aria-hidden="true">→</span>
+          Generate selected files
         </button>
         <p id="status" class="status" role="status" aria-live="polite"></p>
       </section>
 
       <section id="results" class="results" aria-labelledby="results-title" hidden>
         <div class="step-heading light">
-          <span>03</span>
+          <span>3</span>
           <div>
             <h2 id="results-title">Ready to download</h2>
             <p>Generated locally from your GenBank file.</p>
@@ -79,7 +82,7 @@
       </section>
 
       <section class="privacy-note">
-        <span aria-hidden="true">⌁</span>
+        <span aria-hidden="true">✓</span>
         <div>
           <h2>Private by design</h2>
           <p>This is a static web application. Files are read with the browser File API and processed in memory; no sequence data is transmitted or stored.</p>
